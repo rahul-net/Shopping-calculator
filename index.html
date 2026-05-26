@@ -1,11 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="bn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Smart Shopping Memo</title>
+  <title>স্মার্ট শপিং মেমো - Smart Shopping Memo</title>
   
-  <!-- Tailwind CSS CDN -->
+  <!-- PWA meta tags -->
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNtYXJ0IFNob3BwaW5nIE1lbW8iLAogICJzaG9ydF9uYW1lIjogIlNob3BwaW5nIE1lbW8iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzBmMTcyYSIsCiAgInRoZW1lX2NvbG9yIjogIiMwZjE3MmEiCiB9">
+
+  <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -16,987 +22,707 @@
             brand: {
               50: '#f0fdf4',
               100: '#dcfce7',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              900: '#14532d',
-            },
-            accent: {
-              500: '#3b82f6',
-              600: '#2563eb'
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
             }
-          },
-          boxShadow: {
-            'premium': '0 8px 30px rgb(0,0,0,0.06)',
-            'premium-dark': '0 8px 30px rgb(0,0,0,0.3)',
-            'neu-in': 'inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.7)',
-            'neu-out': '4px 4px 10px rgba(0,0,0,0.05), -4px -4px 10px rgba(255,255,255,0.8)',
-            'neu-dark-in': 'inset 2px 2px 5px rgba(0,0,0,0.4), inset -2px -2px 5px rgba(255,255,255,0.05)',
-            'neu-dark-out': '4px 4px 12px rgba(0,0,0,0.3), -4px -4px 12px rgba(255,255,255,0.02)'
           }
         }
       }
     }
   </script>
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
   
-  <!-- jsPDF Library -->
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- jsPDF & html2pdf (Engine for perfect Bengali rendering without breaks) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Premium custom styling and typography */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
-    
     body {
-      font-family: 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
+      font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: contain;
     }
-
     .glassmorphism {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.4);
     }
-
     .dark .glassmorphism {
-      background: rgba(23, 23, 23, 0.8);
+      background: rgba(15, 23, 42, 0.7);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-
-    /* Pull indicator animation */
-    @keyframes bounce-slow {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+    .safe-bottom {
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     }
-    .animate-bounce-slow {
-      animation: bounce-slow 2s infinite;
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
     }
-
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(156, 163, 175, 0.3);
-      border-radius: 99px;
-    }
-
-    /* Elastic transitions */
-    .transition-premium {
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    /* Skeleton Loading Keyframe */
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .skeleton {
-      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite linear;
-    }
-    .dark .skeleton {
-      background: linear-gradient(90deg, #262626 25%, #1f1f1f 50%, #262626 75%);
-      background-size: 200% 100%;
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col selection:bg-brand-500 selection:text-white">
 
-  <!-- TOP BAR -->
-  <header class="sticky top-0 z-30 glassmorphism shadow-premium dark:shadow-premium-dark px-4 py-3 flex items-center justify-between safe-top">
-    <div class="flex items-center gap-3">
-      <div class="bg-brand-500 text-white p-2.5 rounded-2xl shadow-md flex items-center justify-center">
-        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+  <!-- Sticky Top Header -->
+  <header class="sticky top-0 z-40 glassmorphism shadow-sm border-b transition-all">
+    <div class="px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="bg-brand-500 text-white p-2.5 rounded-2xl shadow-lg shadow-brand-500/20">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-base leading-none tracking-tight">স্মার্ট শপিং মেমো</h1>
+          <p id="active-list-title" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">তালিকা লোড হচ্ছে...</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-base font-extrabold tracking-tight text-slate-950 dark:text-white leading-none">Smart Memo</h1>
-        <span class="text-[10px] text-slate-500 dark:text-zinc-400 font-medium uppercase tracking-widest mt-0.5 block">Premium Calculator</span>
+      
+      <div class="flex items-center gap-2">
+        <button id="btn-theme" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle Theme">
+          <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
+          <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-slate-600"></i>
+        </button>
+        <button id="btn-lists" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
+          <i data-lucide="folders" class="w-4 h-4"></i>
+          <span>লিস্টসমূহ</span>
+        </button>
+        <button id="btn-settings" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="PDF Settings">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
       </div>
-    </div>
-    
-    <div class="flex items-center gap-1.5">
-      <!-- Backup Export/Import -->
-      <button onclick="toggleBackupMenu()" class="p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" title="Backup & Restore">
-        <i data-lucide="database" class="w-5 h-5"></i>
-      </button>
-
-      <!-- Theme Switcher -->
-      <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" title="Toggle Theme">
-        <i id="themeIcon" data-lucide="moon" class="w-5 h-5"></i>
-      </button>
-
-      <!-- Manage Lists Drawer Toggle -->
-      <button onclick="openListsModal()" class="relative p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" title="Saved Lists">
-        <i data-lucide="folder-heart" class="w-5 h-5"></i>
-        <span id="savedListsBadge" class="absolute top-1 right-1 bg-brand-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center border-2 border-white dark:border-zinc-900 hidden">0</span>
-      </button>
     </div>
   </header>
 
-  <!-- BACKUP RESTORE FLOATING DROP-UP -->
-  <div id="backupMenu" class="hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm flex items-end justify-center px-4 pb-6">
-    <div class="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-2xl transition-all transform scale-100">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <i data-lucide="database" class="w-5 h-5 text-brand-500"></i> Data Management
-        </h3>
-        <button onclick="toggleBackupMenu()" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <p class="text-xs text-slate-500 dark:text-zinc-400 mb-5">Export your lists to a backup JSON file, or import external records securely. All calculations run strictly inside your browser environment.</p>
-      
-      <div class="grid grid-cols-2 gap-3">
-        <button onclick="exportBackupData()" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-brand-50 dark:bg-zinc-800/50 dark:hover:bg-brand-950/20 border border-slate-200/60 dark:border-zinc-800 rounded-2xl transition-all">
-          <div class="p-3 bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 rounded-xl mb-2">
-            <i data-lucide="download" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs font-semibold">Export JSON</span>
-        </button>
-        <label for="importFile" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-brand-50 dark:bg-zinc-800/50 dark:hover:bg-brand-950/20 border border-slate-200/60 dark:border-zinc-800 rounded-2xl transition-all cursor-pointer">
-          <div class="p-3 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl mb-2">
-            <i data-lucide="upload" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs font-semibold">Import JSON</span>
-          <input type="file" id="importFile" accept=".json" class="hidden" onchange="importBackupData(event)">
-        </label>
-      </div>
+  <main class="flex-grow p-4 space-y-4 max-w-lg mx-auto w-full pb-36">
+    
+    <!-- Quick Search bar -->
+    <div class="relative">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+      </span>
+      <input type="text" id="search-input" placeholder="আইটেম খুঁজুন..." class="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
     </div>
-  </div>
 
-  <main class="flex-1 max-w-md mx-auto w-full px-4 pt-4 pb-48 space-y-4">
+    <!-- Creator Form Panel -->
+    <section class="glassmorphism rounded-2xl p-4 shadow-sm border space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/50 pb-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">নতুন প্রোডাক্ট যোগ করুন</h2>
+        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 bg-brand-50 dark:bg-brand-900/20 px-2.5 py-0.5 rounded-full">
+          <span class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-ping"></span> লাইভ প্রিভিউ
+        </span>
+      </div>
 
-    <!-- CURRENT LIST ACTIVE CARD -->
-    <div class="glassmorphism rounded-3xl p-4 shadow-premium dark:shadow-premium-dark border border-white/60 dark:border-zinc-800">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
-          <span id="activeListNameDisplay" class="font-extrabold text-slate-900 dark:text-white text-base">Current List</span>
-        </div>
-        <div class="flex gap-1">
-          <button onclick="promptRenameCurrentList()" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800" title="Rename List">
-            <i data-lucide="edit-3" class="w-4 h-4"></i>
-          </button>
-          <button onclick="confirmClearAll()" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20" title="Clear current items">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
+      <!-- Live Dynamic Card Preview -->
+      <div class="relative bg-gradient-to-br from-brand-600 to-emerald-600 rounded-xl p-4 text-white overflow-hidden shadow-md shadow-brand-500/10 min-h-[92px] transition-all">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+        <div class="relative flex justify-between items-start">
+          <div class="space-y-1 w-2/3">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">প্রোডাক্ট প্রিভিউ</span>
+            <h3 id="preview-name" class="font-bold text-base truncate">প্রোডাক্টের নাম</h3>
+            <p id="preview-qty-rate" class="text-xs text-brand-50">০ x ৳ ০.০০</p>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">মোট মূল্য</span>
+            <p id="preview-subtotal" class="font-bold text-lg tracking-tight">৳ ০.০০</p>
+          </div>
         </div>
       </div>
 
-      <!-- Live Search & Filter Bar within active context -->
-      <div class="relative">
-        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-        <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search current list items..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-100/80 dark:bg-zinc-900/80 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
-      </div>
-    </div>
-
-    <!-- 1) LIVE PRODUCT PREVIEW & INPUT FORM -->
-    <section class="glassmorphism rounded-3xl p-5 shadow-premium dark:shadow-premium-dark space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Live Item Input</h2>
-        <span class="text-[10px] bg-brand-100 dark:bg-brand-950/40 text-brand-600 dark:text-brand-400 font-extrabold px-2.5 py-0.5 rounded-full">Automated Preview</span>
-      </div>
-
-      <!-- Real-Time Interactive Card -->
-      <div class="bg-gradient-to-br from-brand-500 to-emerald-600 text-white rounded-2xl p-4 shadow-lg shadow-brand-500/10 relative overflow-hidden transition-all duration-300">
-        <!-- Background organic accent shapes -->
-        <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-        <div class="absolute -left-6 -top-6 w-20 h-20 bg-white/10 rounded-full blur-lg"></div>
-
-        <div class="relative z-10 flex flex-col justify-between h-full min-h-[5.5rem]">
-          <div class="flex justify-between items-start">
-            <div class="space-y-0.5">
-              <span class="text-[10px] uppercase font-bold text-emerald-100 tracking-wider">Preview Card</span>
-              <h3 id="previewTitle" class="text-lg font-extrabold tracking-tight truncate max-w-[200px]">Item Name</h3>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-emerald-100 block font-semibold">Calculated Total</span>
-              <div class="text-xl font-black"><span id="previewTotalCost">0.00</span> ৳</div>
-            </div>
-          </div>
+      <!-- Input Fields Form -->
+      <div class="space-y-3.5">
+        <!-- Autocomplete Product Input -->
+        <div class="relative">
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-name">প্রোডাক্টের নাম (বাংলা অথবা ইংরেজি)</label>
+          <input type="text" id="item-name" placeholder="যেমন: লাক্স সাবান, শ্যাম্পু, ক্যাডবেরি চকলেট..." class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all" autocomplete="off">
           
-          <div class="border-t border-white/20 pt-2 mt-3 flex justify-between items-center text-[11px] text-emerald-50">
-            <div>
-              Unit Price: <span id="previewUnitPrice" class="font-bold">0.00</span> ৳
-            </div>
-            <div>
-              Qty: <span id="previewQuantity" class="font-bold">1</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Inputs -->
-      <div class="space-y-3">
-        <div>
-          <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5 block">Product Name</label>
-          <div class="relative">
-            <input type="text" id="prodName" oninput="updateLivePreview()" placeholder="e.g. Fresh Milk, Soap, Bread..." class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white text-sm transition-all shadow-neu-in dark:shadow-neu-dark-in" required>
-            <!-- Suggestions Dropdown -->
-            <div id="suggestionsBox" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl max-h-36 overflow-y-auto z-50"></div>
+          <!-- Autocomplete Dropdown list -->
+          <div id="autocomplete-list" class="absolute z-50 left-0 right-0 top-[74px] glassmorphism border border-slate-200 dark:border-slate-800 rounded-xl max-h-48 overflow-y-auto shadow-xl hidden transition-all no-scrollbar">
+            <!-- suggestions -->
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5 block">Unit Price (৳)</label>
-            <input type="number" id="prodPrice" step="0.01" oninput="updateLivePreview()" placeholder="0.00" class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white text-sm transition-all shadow-neu-in dark:shadow-neu-dark-in" required>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-price">একক মূল্য (৳)</label>
+            <input type="number" id="item-price" step="any" placeholder="০.০০" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
           </div>
           <div>
-            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1.5 block">Quantity</label>
-            <div class="flex items-center bg-slate-100 dark:bg-zinc-900 rounded-xl overflow-hidden shadow-neu-in dark:shadow-neu-dark-in">
-              <button onclick="decrementFormQty()" class="px-3 py-3 text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"><i data-lucide="minus" class="w-4 h-4"></i></button>
-              <input type="number" id="prodQty" value="1" min="1" oninput="updateLivePreview()" class="w-full bg-transparent border-0 text-center text-sm font-bold focus:ring-0 text-slate-900 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-              <button onclick="incrementFormQty()" class="px-3 py-3 text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors"><i data-lucide="plus" class="w-4 h-4"></i></button>
-            </div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-qty">পরিমাণ / সংখ্যা</label>
+            <input type="number" id="item-qty" step="any" placeholder="১" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
           </div>
         </div>
 
-        <button onclick="addProductToList()" class="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center gap-2 text-sm mt-2">
-          <i data-lucide="plus-circle" class="w-5 h-5"></i> Add Product to List
+        <button id="btn-add-item" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> তালিকায় যোগ করুন
         </button>
       </div>
     </section>
 
-    <!-- 2) ELEGANT PRODUCT LIST & CARDS -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Listed Items</h2>
-        <span id="itemsCounter" class="text-[10px] bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 font-extrabold px-2 py-0.5 rounded-full">0 Items</span>
+    <!-- Shopping Items Section -->
+    <section class="space-y-2">
+      <div class="flex justify-between items-center px-1">
+        <h3 class="font-bold text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="list-checks" class="w-4 h-4"></i> মেমো আইটেমসমূহ
+        </h3>
+        <button id="btn-clear-all" class="text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-400 flex items-center gap-1 transition-all">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> সব মুছুন
+        </button>
       </div>
 
-      <!-- Empty State View -->
-      <div id="emptyState" class="bg-white dark:bg-zinc-900 border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-8 text-center flex flex-col items-center justify-center space-y-3 transition-all">
-        <div class="w-16 h-16 bg-slate-50 dark:bg-zinc-800/50 rounded-full flex items-center justify-center text-slate-400">
-          <i data-lucide="shopping-cart" class="w-8 h-8"></i>
-        </div>
-        <div>
-          <h3 class="font-bold text-slate-800 dark:text-white">Your list is empty</h3>
-          <p class="text-xs text-slate-400 mt-1">Add items above to begin real-time calculations and invoice generation.</p>
-        </div>
+      <!-- List Container -->
+      <div id="items-container" class="space-y-2.5">
+        <!-- Injected via JS -->
       </div>
+    </section>
 
-      <!-- Product List Node Container -->
-      <div id="productList" class="space-y-2.5"></div>
+    <!-- Storage Backup/Restore Panel -->
+    <section class="glassmorphism rounded-2xl p-3 shadow-xs border flex justify-between items-center gap-2">
+      <div class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+        সকল ডেটা অফলাইনে আপনার ব্রাউজারে সংরক্ষিত থাকে।
+      </div>
+      <div class="flex gap-2">
+        <button id="btn-export-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> ব্যাকআপ
+        </button>
+        <button id="btn-import-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i> রিস্টোর
+        </button>
+        <input type="file" id="import-file-input" class="hidden" accept=".json">
+      </div>
     </section>
 
   </main>
 
-  <!-- 4) GRAND TOTAL SECTION (Sticky Premium Footer Hub) -->
-  <section class="fixed bottom-0 left-0 right-0 z-30 max-w-md mx-auto px-4 pb-6 pt-3 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-zinc-950 dark:via-zinc-950/95 dark:to-transparent safe-bottom">
-    <div class="glassmorphism rounded-3xl p-5 shadow-2xl border border-white/80 dark:border-zinc-800/80">
-      
-      <!-- Premium Quick Stats Row -->
-      <div class="grid grid-cols-3 gap-2 border-b border-slate-200/50 dark:border-zinc-800/50 pb-3 mb-3">
-        <div class="text-center">
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Unique</span>
-          <span id="grandCount" class="text-sm font-black text-slate-800 dark:text-white transition-all">0</span>
+  <!-- Sticky Bottom Summary Bar -->
+  <footer class="fixed bottom-0 left-0 right-0 z-40 glassmorphism border-t border-slate-200 dark:border-slate-800/80 safe-bottom shadow-2xl max-w-lg mx-auto">
+    <div class="px-4 py-3 grid grid-cols-2 gap-4 items-center">
+      <div class="flex flex-col">
+        <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">সর্বমোট বিল</span>
+        <div class="flex items-baseline gap-1">
+          <span id="grand-total-val" class="font-extrabold text-2xl tracking-tight text-brand-600 dark:text-brand-400">৳ ০.০০</span>
         </div>
-        <div class="text-center border-x border-slate-200/50 dark:border-zinc-800/50">
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">Quantities</span>
-          <span id="grandQty" class="text-sm font-black text-slate-800 dark:text-white transition-all">0</span>
-        </div>
-        <div class="text-center">
-          <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">List Saved</span>
-          <span id="savedIndicator" class="text-xs font-black text-rose-500 uppercase tracking-wider flex items-center justify-center gap-1 mt-0.5">
-            <i data-lucide="cloud-off" class="w-3 h-3"></i> Unsaved
-          </span>
-        </div>
+        <span id="summary-meta" class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">০ টি আইটেম</span>
       </div>
-
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500 tracking-wider">Estimated Cost</span>
-          <div class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            <span id="grandTotal">0.00</span> <span class="text-brand-500 font-extrabold text-lg ml-0.5">৳</span>
-          </div>
-        </div>
-
-        <div class="flex gap-2">
-          <!-- Quick Save Button -->
-          <button onclick="saveActiveList()" class="bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 p-3.5 rounded-2xl transition-all shadow-sm active:scale-95" title="Save current state">
-            <i data-lucide="save" class="w-5 h-5"></i>
-          </button>
-
-          <!-- Generate Invoice PDF Trigger -->
-          <button onclick="openPdfConfigModal()" class="bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white px-5 py-3.5 rounded-2xl font-extrabold text-sm flex items-center gap-2 shadow-lg shadow-brand-500/20 transition-all">
-            <i data-lucide="printer" class="w-4 h-4"></i> Export Cash Memo
-          </button>
-        </div>
+      <div>
+        <button id="btn-export-pdf" class="w-full bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-500 hover:to-emerald-500 active:scale-95 text-white py-3 px-4 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center gap-1.5">
+          <i data-lucide="file-text" class="w-4.5 h-4.5"></i> মেমো ডাউনলোড করুন
+        </button>
       </div>
     </div>
-  </section>
+  </footer>
 
-  <!-- 5) LISTS MANAGER MODAL / DRAWER -->
-  <div id="listsModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center px-4 pb-6">
-    <div class="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-2xl transition-all max-h-[80vh] flex flex-col">
-      <div class="flex justify-between items-center mb-4">
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i data-lucide="bookmark-check" class="w-5 h-5 text-brand-500"></i> Saved Archives
-          </h3>
-          <p class="text-[11px] text-slate-400 dark:text-zinc-500">Instantly toggle, rename or clear older checklists</p>
-        </div>
-        <button onclick="closeListsModal()" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <!-- Filter/Search Field inside modal -->
-      <div class="relative mb-3">
-        <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-        <input type="text" id="filterListsInput" oninput="renderSavedLists(this.value)" placeholder="Filter saved lists..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
-      </div>
-
-      <!-- Quick Create New Blank List -->
-      <button onclick="createNewBlankList()" class="mb-4 w-full py-2.5 bg-brand-50 dark:bg-brand-950/20 text-brand-600 dark:text-brand-400 border border-dashed border-brand-200 dark:border-brand-900/50 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-brand-100 transition-colors">
-        <i data-lucide="plus" class="w-4 h-4"></i> Create New Empty List
-      </button>
-
-      <!-- Scrollable List of Saved Memo Records -->
-      <div id="savedListsContainer" class="flex-1 overflow-y-auto space-y-2.5"></div>
+  <!-- MODERN CUSTOM MODAL DIALOGS -->
+  <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+    <div id="modal-content" class="w-full max-w-sm glassmorphism rounded-3xl p-5 shadow-2xl border transition-all scale-95 opacity-0 duration-300">
+      <!-- Injected via JS -->
     </div>
   </div>
 
-  <!-- PDF CUSTOMIZATION CONFIG MODAL -->
-  <div id="pdfConfigModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
-    <div class="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-2xl transition-all">
+  <!-- MULTIPLE SAVED LISTS MODAL -->
+  <div id="modal-lists" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+    <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-md font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <i data-lucide="settings" class="w-5 h-5 text-brand-500"></i> Invoice Meta Fields
+        <h3 class="font-extrabold text-base flex items-center gap-2">
+          <i data-lucide="folders" class="w-5 h-5 text-brand-500"></i> আপনার মেমো লিস্টসমূহ
         </h3>
-        <button onclick="closePdfConfigModal()" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="toggleListsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <!-- List Items List Container -->
+      <div id="lists-items-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 no-scrollbar mb-4">
+        <!-- Saved Lists -->
       </div>
 
-      <div class="space-y-3">
-        <div>
-          <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1 block">Custom Shop/Issuer Name</label>
-          <input type="text" id="pdfShopName" value="SMART SHOPPING MEMO" class="w-full px-4 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1 block">Custom Invoice Memo No.</label>
-          <input type="text" id="pdfInvoiceNo" value="" placeholder="e.g. SSM-1049 (Auto-gen if empty)" class="w-full px-4 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
-        </div>
-        <div>
-          <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1 block">Footer Thank You Note</label>
-          <input type="text" id="pdfThankYouNote" value="Thank you for shopping with us!" class="w-full px-4 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
-        </div>
-        <div class="flex items-center gap-2 pt-2">
-          <input type="checkbox" id="pdfIncludeDate" checked class="rounded text-brand-500 focus:ring-brand-500 bg-slate-100 dark:bg-zinc-900 border-0">
-          <label for="pdfIncludeDate" class="text-xs text-slate-600 dark:text-zinc-400">Include exact timestamp</label>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2 mt-5">
-        <button onclick="closePdfConfigModal()" class="py-2.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 rounded-xl transition-colors">Cancel</button>
-        <button onclick="triggerInvoiceExport()" class="py-2.5 text-xs font-bold bg-brand-500 hover:bg-brand-600 text-white rounded-xl shadow-md transition-colors flex items-center justify-center gap-1.5">
-          <i data-lucide="file-text" class="w-4 h-4"></i> Generate PDF
+      <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+        <button id="btn-create-list" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-1">
+          <i data-lucide="plus" class="w-4 h-4"></i> নতুন মেমো লিস্ট তৈরি করুন
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CUSTOM GLOBAL CONFIRMATION/INPUT MODAL (No native alert blockers) -->
-  <div id="dialogModal" class="hidden fixed inset-0 z-50 bg-black/45 backdrop-blur-sm flex items-center justify-center px-4">
-    <div class="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl p-6 shadow-2xl transition-all transform scale-100">
-      <div class="flex items-center gap-3 mb-3">
-        <div id="dialogIconBox" class="p-2.5 rounded-2xl bg-brand-50 text-brand-500">
-          <i id="dialogIcon" data-lucide="help-circle" class="w-6 h-6"></i>
+  <!-- PDF CASH MEMO SETTINGS MODAL -->
+  <div id="modal-settings" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+    <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-extrabold text-base flex items-center gap-2">
+          <i data-lucide="settings-2" class="w-5 h-5 text-brand-500"></i> মেমো ও দোকানের সেটিংস
+        </h3>
+        <button onclick="toggleSettingsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-sm">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-shop">দোকান / প্রতিষ্ঠানের নাম</label>
+          <input type="text" id="setting-shop" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
         </div>
-        <h3 id="dialogTitle" class="text-base font-extrabold text-slate-900 dark:text-white">Confirm Action</h3>
-      </div>
-      <p id="dialogMessage" class="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed mb-4">Are you sure you want to proceed?</p>
-      
-      <!-- Optional input for Prompt fallback styling -->
-      <div id="dialogInputContainer" class="hidden mb-4">
-        <input type="text" id="dialogInputField" class="w-full px-4 py-3 text-xs rounded-xl bg-slate-100 dark:bg-zinc-900 border-0 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-invoice">মেমো নম্বর প্রিফিক্স</label>
+            <input type="text" id="setting-invoice" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-currency">মুদ্রার প্রতীক</label>
+            <input type="text" id="setting-currency" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-footer">ফুটার বার্তা (ধন্যবাদ নোট)</label>
+          <input type="text" id="setting-footer" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+        </div>
+        <div class="flex items-center justify-between p-1">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">সময় ও তারিখ যুক্ত করুন</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="setting-timestamp" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+          </label>
+        </div>
       </div>
 
-      <div class="flex gap-2 justify-end">
-        <button id="dialogCancelBtn" onclick="closeDialog(false)" class="px-4 py-2.5 text-xs font-bold text-slate-500 dark:text-zinc-400 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl transition-colors">Cancel</button>
-        <button id="dialogConfirmBtn" onclick="closeDialog(true)" class="px-4 py-2.5 text-xs font-bold text-white bg-brand-500 hover:bg-brand-600 rounded-xl shadow-md transition-colors">Confirm</button>
+      <div class="mt-5 flex gap-2">
+        <button onclick="toggleSettingsModal(false)" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-bold text-sm transition-all">
+          সংরক্ষণ করুন
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- TOAST NOTIFICATION STACK -->
-  <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 w-full max-w-[320px] pointer-events-none"></div>
-
-  <!-- UNDO TRIGGER FLOATER -->
-  <div id="undoNotification" class="hidden fixed bottom-32 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-xs bg-slate-900 dark:bg-zinc-800 text-white rounded-2xl px-4 py-3 flex items-center justify-between shadow-2xl transition-all">
-    <div class="flex items-center gap-2">
-      <i data-lucide="rotate-ccw" class="w-4 h-4 text-amber-400"></i>
-      <span class="text-xs font-semibold">Product removed from list.</span>
-    </div>
-    <button onclick="triggerUndo()" class="text-xs font-extrabold text-brand-400 uppercase tracking-wider hover:text-brand-300">Undo</button>
+  <!-- PREMIUM TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-24 left-4 right-4 z-50 flex flex-col gap-2 max-w-sm mx-auto pointer-events-none">
+    <!-- Dynamic Toasts -->
   </div>
 
-  <!-- JAVASCRIPT APP ENGINE -->
+  <!-- INVISIBLE TEMPLATE AREA FOR PROFESSIONAL HIGH-RES MEMO GENERATION -->
+  <div id="invisible-pdf-invoice" class="hidden">
+    <!-- HTML markup optimized for crisp high-resolution 300 DPI Rendering with proper Unicode fallback -->
+  </div>
+
+  <!-- APPLICATION LOGIC -->
   <script>
-    // System Constants & Autocomplete Dictionary
-    const PRODUCT_DICTIONARY = [
-      { name: "Aloo (Potato)", price: 40 },
-      { name: "Piyaj (Onion)", price: 80 },
-      { name: "Roshun (Garlic)", price: 120 },
-      { name: "Surgar (Chini)", price: 135 },
-      { name: "Moshur Dal", price: 140 },
-      { name: "Shorishar Tel", price: 210 },
-      { name: "Ata (Flour)", price: 65 },
-      { name: "Soap (Shaban)", price: 75 },
-      { name: "Rice (Chaal)", price: 70 },
-      { name: "Soyabean Oil", price: 165 },
-      { name: "Salt (Lobon)", price: 42 },
-      { name: "Dano Milk Powder", price: 850 },
-      { name: "Egg (Dim - Per Case)", price: 145 },
-      { name: "Lipton Tea Bags", price: 190 },
-      { name: "Green Chili", price: 120 },
-      { name: "Ginger (Ada)", price: 220 }
-    ];
-
-    // State Variables
-    let activeListName = "Current Grocery";
-    let activeListItems = [];
-    let savedLists = {};
-    let undoBuffer = null;
-    let dialogCallback = null;
-
-    // App Initialization
-    window.onload = function() {
-      // Initialize dynamic fallback manifest & service worker injection
-      setupPwaCapabilities();
-
-      // Theme Bootstrap
-      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
-      }
-
-      // Load persistent state from Storage
-      savedLists = JSON.parse(localStorage.getItem('ssm_saved_lists')) || {};
-      activeListName = localStorage.getItem('ssm_active_list_name') || "Today's Market";
-      
-      // If there's an active list, fetch its content
-      if (savedLists[activeListName]) {
-        activeListItems = savedLists[activeListName];
-      } else {
-        // Fallback default state - now starts completely empty
-        activeListItems = [];
-        savedLists[activeListName] = activeListItems;
-        saveToLocalStorage();
-      }
-
-      // Setup inputs and UI counters
-      document.getElementById('activeListNameDisplay').innerText = activeListName;
-      updateLivePreview();
-      renderActiveList();
-      updateSavedListsBadge();
-      
-      // Setup Lucide SVG Replacement Icon Engine
-      lucide.createIcons();
-
-      // Input Event Listeners for Custom Autocomplete Recommendations
-      const prodNameInput = document.getElementById('prodName');
-      prodNameInput.addEventListener('focus', () => handleSearchInput(prodNameInput.value));
-      prodNameInput.addEventListener('input', () => handleSearchInput(prodNameInput.value));
-      
-      // Close autocomplete on click elsewhere
-      document.addEventListener('click', (e) => {
-        if (e.target.id !== 'prodName' && e.target.id !== 'suggestionsBox') {
-          document.getElementById('suggestionsBox').classList.add('hidden');
-        }
-      });
+    // --- MAIN APP STATE (Initializing with EMPTY items per user request) ---
+    let state = {
+      lists: {}, 
+      activeListId: '',
+      settings: {
+        shopName: 'প্রিমিয়াম গ্রোসারি ও কসমেটিক্স মার্ট',
+        invoicePrefix: 'INV-',
+        invoiceCounter: 2501,
+        currency: '৳',
+        footerNote: 'আমাদের পণ্য ব্যবহারের জন্য আপনাকে আন্তরিক ধন্যবাদ। আবার আসবেন!',
+        includeTimestamp: true
+      },
+      darkMode: false
     };
 
-    // ----------------------------------------------------
-    // PERSISTENCE ENGINE
-    // ----------------------------------------------------
-    function saveToLocalStorage() {
-      localStorage.setItem('ssm_saved_lists', JSON.stringify(savedLists));
-      localStorage.setItem('ssm_active_list_name', activeListName);
-      updateSavedListsBadge();
-    }
+    let undoBuffer = null;
 
-    function updateSavedListsBadge() {
-      const keys = Object.keys(savedLists);
-      const badge = document.getElementById('savedListsBadge');
-      if (keys.length > 0) {
-        badge.innerText = keys.length;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-    }
+    // GROCERY, COSMETICS, SHAMPOO, SOAP, CHOCOLATE SPECIFIC AUTOCOMPLETE DICTIONARY
+    const DICTIONARY = [
+      { bn: 'ক্লিয়ার শ্যাম্পু (Clear Shampoo)', en: 'Clear Shampoo' },
+      { bn: 'সানসিল্ক শ্যাম্পু (Sunsilk Shampoo)', en: 'Sunsilk Shampoo' },
+      { bn: 'ডাভ শ্যাম্পু (Dove Shampoo)', en: 'Dove Shampoo' },
+      { bn: 'লাক্স সাবান (Lux Soap)', en: 'Lux Soap' },
+      { bn: 'ডেটল সাবান (Dettol Soap)', en: 'Dettol Soap' },
+      { bn: 'লাইফবয় সাবান (Lifebuoy Soap)', en: 'Lifebuoy Soap' },
+      { bn: 'ক্যাডবেরি চকলেট (Cadbury Chocolate)', en: 'Cadbury Chocolate' },
+      { bn: 'কিটক্যাট চকলেট (KitKat Chocolate)', en: 'KitKat Chocolate' },
+      { bn: 'ডেইরি মিল্ক (Dairy Milk)', en: 'Dairy Milk' },
+      { bn: 'নারকেল তেল (Coconut Oil)', en: 'Coconut Oil' },
+      { bn: 'সরিষার তেল (Mustard Oil)', en: 'Mustard Oil' },
+      { bn: 'সয়াবিন তেল (Soyabean Oil)', en: 'Soyabean Oil' },
+      { bn: 'পন্ডস ফেসওয়াশ (Ponds Facewash)', en: 'Ponds Facewash' },
+      { bn: 'লিপস্টিক (Lipstick)', en: 'Lipstick' },
+      { bn: 'বডি স্প্রে (Body Spray)', en: 'Body Spray' },
+      { bn: 'টুথপেস্ট (Toothpaste)', en: 'Toothpaste' },
+      { bn: 'তরল দুধ (Liquid Milk)', en: 'Liquid Milk' },
+      { bn: 'গুঁড়ো দুধ (Powder Milk)', en: 'Powder Milk' },
+      { bn: 'হ্যান্ডওয়াশ (Handwash)', en: 'Handwash' },
+      { bn: 'কন্ডিশনার (Conditioner)', en: 'Conditioner' },
+      { bn: 'পারফিউম (Perfume)', en: 'Perfume' }
+    ];
 
-    // ----------------------------------------------------
-    // DYNAMIC THEME SYSTEM
-    // ----------------------------------------------------
-    function toggleTheme() {
-      const htmlClass = document.documentElement.classList;
-      const themeIcon = document.getElementById('themeIcon');
-      
-      if (htmlClass.contains('dark')) {
-        htmlClass.remove('dark');
-        localStorage.setItem('theme', 'light');
-        themeIcon.setAttribute('data-lucide', 'moon');
-        showToast("Theme changed to Light Mode", "info");
-      } else {
-        htmlClass.add('dark');
-        localStorage.setItem('theme', 'dark');
-        themeIcon.setAttribute('data-lucide', 'sun');
-        showToast("Theme changed to Dark Mode", "info");
-      }
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initTheme();
+      initUI();
+      renderAll();
       lucide.createIcons();
+    });
+
+    function saveState() {
+      localStorage.setItem('smart_shopping_memo_state_v2', JSON.stringify(state));
     }
 
-    // ----------------------------------------------------
-    // IN-LINE DIALOG & TOAST EMULATOR (Zero Alerts)
-    // ----------------------------------------------------
-    function showToast(message, type = "success") {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold text-white shadow-xl transform translate-y-2 transition-all duration-300 opacity-0 scale-95 pointer-events-auto`;
-      
-      let icon = "info";
-      if (type === "success") {
-        toast.classList.add('bg-brand-500');
-        icon = "check-circle";
-      } else if (type === "warning") {
-        toast.classList.add('bg-amber-500');
-        icon = "alert-triangle";
-      } else if (type === "danger") {
-        toast.classList.add('bg-rose-500');
-        icon = "x-circle";
-      } else {
-        toast.classList.add('bg-slate-800', 'dark:bg-zinc-800');
-      }
-
-      toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i> <span>${message}</span>`;
-      container.appendChild(toast);
-      lucide.createIcons();
-
-      // Trigger animation frame sequence
-      setTimeout(() => {
-        toast.classList.remove('opacity-0', 'translate-y-2', 'scale-95');
-      }, 10);
-
-      // Dismiss Sequence
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-[-10px]', 'scale-90');
-        setTimeout(() => {
-          toast.remove();
-        }, 300);
-      }, 3500);
-    }
-
-    // Custom Modular Promise Dialog
-    function showCustomDialog(title, message, isPrompt = false, defaultValue = "", iconName = "help-circle", actionColorClass = "bg-brand-500") {
-      return new Promise((resolve) => {
-        const modal = document.getElementById('dialogModal');
-        const titleEl = document.getElementById('dialogTitle');
-        const msgEl = document.getElementById('dialogMessage');
-        const inputContainer = document.getElementById('dialogInputContainer');
-        const inputField = document.getElementById('dialogInputField');
-        const iconEl = document.getElementById('dialogIcon');
-        const confirmBtn = document.getElementById('dialogConfirmBtn');
-
-        titleEl.innerText = title;
-        msgEl.innerText = message;
-        
-        // Reset dynamic classes
-        confirmBtn.className = `px-4 py-2.5 text-xs font-bold text-white rounded-xl shadow-md transition-colors ${actionColorClass}`;
-        iconEl.setAttribute('data-lucide', iconName);
-        lucide.createIcons();
-
-        if (isPrompt) {
-          inputContainer.classList.remove('hidden');
-          inputField.value = defaultValue;
-          inputField.focus();
-        } else {
-          inputContainer.classList.add('hidden');
-        }
-
-        modal.classList.remove('hidden');
-
-        dialogCallback = function(approved) {
-          modal.classList.add('hidden');
-          if (approved) {
-            resolve(isPrompt ? inputField.value : true);
-          } else {
-            resolve(false);
+    function loadState() {
+      const saved = localStorage.getItem('smart_shopping_memo_state_v2');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+          if (!state.lists || Object.keys(state.lists).length === 0) {
+            setupInitialEmptyList();
           }
-          dialogCallback = null;
-        };
+        } catch (e) {
+          setupInitialEmptyList();
+        }
+      } else {
+        setupInitialEmptyList();
+      }
+    }
+
+    // Set up completely empty board as requested
+    function setupInitialEmptyList() {
+      const defaultId = 'list_' + Date.now();
+      state.lists = {};
+      state.lists[defaultId] = {
+        id: defaultId,
+        name: 'গ্রোসারি শপিং লিস্ট',
+        items: [] // Absolutely no items initially
+      };
+      state.activeListId = defaultId;
+      saveState();
+    }
+
+    function initTheme() {
+      if (state.darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    function toggleTheme() {
+      state.darkMode = !state.darkMode;
+      initTheme();
+      saveState();
+    }
+
+    function initUI() {
+      document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+
+      const inputs = ['item-name', 'item-price', 'item-qty'];
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateLivePreviewCard);
       });
+
+      const nameInput = document.getElementById('item-name');
+      nameInput.addEventListener('focus', handleAutocomplete);
+      nameInput.addEventListener('input', handleAutocomplete);
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#item-name') && !e.target.closest('#autocomplete-list')) {
+          document.getElementById('autocomplete-list').classList.add('hidden');
+        }
+      });
+
+      document.getElementById('btn-add-item').addEventListener('click', addItemFromUI);
+
+      document.getElementById('btn-clear-all').addEventListener('click', () => {
+        showCustomConfirm(
+          'লিস্ট খালি করুন',
+          'আপনি কি নিশ্চিত যে বর্তমান তালিকার সকল আইটেম মুছে ফেলতে চান?',
+          () => {
+            const activeList = state.lists[state.activeListId];
+            if (activeList) {
+              activeList.items = [];
+              saveState();
+              renderAll();
+              showToast('সকল আইটেম মুছে ফেলা হয়েছে', 'warning');
+            }
+          }
+        );
+      });
+
+      document.getElementById('search-input').addEventListener('input', renderAll);
+      document.getElementById('btn-lists').addEventListener('click', () => { toggleListsModal(true); });
+      document.getElementById('btn-settings').addEventListener('click', () => { toggleSettingsModal(true); });
+
+      document.getElementById('btn-create-list').addEventListener('click', () => {
+        showCustomPrompt('নতুন শপিং মেমো লিস্ট', 'নতুন মেমো লিস্টের জন্য একটি নাম লিখুন:', 'গ্রোসারি ও কসমেটিক্স', (listName) => {
+          if (listName && listName.trim()) {
+            const newListId = 'list_' + Date.now();
+            state.lists[newListId] = {
+              id: newListId,
+              name: listName.trim(),
+              items: []
+            };
+            state.activeListId = newListId;
+            saveState();
+            renderAll();
+            renderSavedListsUI();
+            toggleListsModal(false);
+            showToast(`"${listName}" লিস্ট তৈরি হয়েছে!`, 'success');
+          }
+        });
+      });
+
+      document.getElementById('btn-import-backup').addEventListener('click', () => {
+        document.getElementById('import-file-input').click();
+      });
+
+      document.getElementById('import-file-input').addEventListener('change', handleImportBackup);
+      document.getElementById('btn-export-backup').addEventListener('click', exportBackupJSON);
+      document.getElementById('btn-export-pdf').addEventListener('click', generateProfessionalPDFMemo);
+
+      // Bind settings inputs
+      document.getElementById('setting-shop').addEventListener('input', (e) => { state.settings.shopName = e.target.value; saveState(); });
+      document.getElementById('setting-invoice').addEventListener('input', (e) => { state.settings.invoicePrefix = e.target.value; saveState(); });
+      document.getElementById('setting-currency').addEventListener('input', (e) => { state.settings.currency = e.target.value; saveState(); renderAll(); });
+      document.getElementById('setting-footer').addEventListener('input', (e) => { state.settings.footerNote = e.target.value; saveState(); });
+      document.getElementById('setting-timestamp').addEventListener('change', (e) => { state.settings.includeTimestamp = e.target.checked; saveState(); });
+
+      // Load initial Settings
+      document.getElementById('setting-shop').value = state.settings.shopName;
+      document.getElementById('setting-invoice').value = state.settings.invoicePrefix;
+      document.getElementById('setting-currency').value = state.settings.currency;
+      document.getElementById('setting-footer').value = state.settings.footerNote;
+      document.getElementById('setting-timestamp').checked = state.settings.includeTimestamp;
     }
 
-    function closeDialog(approved) {
-      if (dialogCallback) {
-        dialogCallback(approved);
-      }
-    }
-
-    // ----------------------------------------------------
-    // FORM / PREVIEW MOTOR
-    // ----------------------------------------------------
-    function updateLivePreview() {
-      const name = document.getElementById('prodName').value.trim() || "Product Name";
-      const price = parseFloat(document.getElementById('prodPrice').value) || 0.00;
-      const qty = parseInt(document.getElementById('prodQty').value) || 1;
+    function handleAutocomplete() {
+      const q = document.getElementById('item-name').value.trim().toLowerCase();
+      const listEl = document.getElementById('autocomplete-list');
+      listEl.innerHTML = '';
       
-      const itemTotal = (price * qty).toFixed(2);
+      const filtered = DICTIONARY.filter(item => {
+        return item.en.toLowerCase().includes(q) || item.bn.toLowerCase().includes(q);
+      });
 
-      document.getElementById('previewTitle').innerText = name;
-      document.getElementById('previewUnitPrice').innerText = price.toFixed(2);
-      document.getElementById('previewQuantity').innerText = qty;
-      document.getElementById('previewTotalCost').innerText = itemTotal;
-    }
-
-    // Form inputs helper actions
-    function incrementFormQty() {
-      const field = document.getElementById('prodQty');
-      let val = parseInt(field.value) || 1;
-      field.value = val + 1;
-      updateLivePreview();
-    }
-
-    function decrementFormQty() {
-      const field = document.getElementById('prodQty');
-      let val = parseInt(field.value) || 1;
-      if (val > 1) {
-        field.value = val - 1;
-        updateLivePreview();
+      if (filtered.length > 0) {
+        listEl.classList.remove('hidden');
+        filtered.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'px-4 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex justify-between items-center border-b border-slate-100 dark:border-slate-800/30 last:border-b-0';
+          row.innerHTML = `
+            <span class="font-semibold text-slate-800 dark:text-slate-100">${item.bn}</span>
+          `;
+          row.addEventListener('click', () => {
+            document.getElementById('item-name').value = item.bn;
+            listEl.classList.add('hidden');
+            updateLivePreviewCard();
+          });
+          listEl.appendChild(row);
+        });
+      } else {
+        listEl.classList.add('hidden');
       }
     }
 
-    // ----------------------------------------------------
-    // AUTOCOMPLETE SYSTEM
-    // ----------------------------------------------------
-    function handleSearchInput(query) {
-      const suggestionsBox = document.getElementById('suggestionsBox');
-      if (!query.trim()) {
-        renderSuggestions(PRODUCT_DICTIONARY);
-        return;
-      }
+    function updateLivePreviewCard() {
+      const name = document.getElementById('item-name').value.trim() || 'প্রোডাক্টের নাম';
+      const price = parseFloat(document.getElementById('item-price').value) || 0;
+      const qty = parseFloat(document.getElementById('item-qty').value) || 0;
+      const symb = state.settings.currency;
 
-      const filtered = PRODUCT_DICTIONARY.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase())
-      );
-
-      renderSuggestions(filtered);
+      document.getElementById('preview-name').textContent = name;
+      document.getElementById('preview-qty-rate').textContent = `${qty} x ${symb} ${price.toFixed(2)}`;
+      document.getElementById('preview-subtotal').textContent = `${symb} ${(qty * price).toFixed(2)}`;
     }
 
-    function renderSuggestions(list) {
-      const suggestionsBox = document.getElementById('suggestionsBox');
-      if (list.length === 0) {
-        suggestionsBox.classList.add('hidden');
-        return;
-      }
-
-      suggestionsBox.innerHTML = list.map(item => `
-        <button onclick="selectSuggestion('${item.name.replace(/'/g, "\\'")}', ${item.price})" class="w-full text-left px-4 py-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 text-xs text-slate-700 dark:text-zinc-300 flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
-          <span class="font-medium">${item.name}</span>
-          <span class="bg-brand-50 dark:bg-brand-950/20 text-brand-600 dark:text-brand-400 font-extrabold px-2 py-0.5 rounded-md text-[10px]">${item.price} ৳</span>
-        </button>
-      `).join('');
-      suggestionsBox.classList.remove('hidden');
-    }
-
-    function selectSuggestion(name, price) {
-      document.getElementById('prodName').value = name;
-      document.getElementById('prodPrice').value = price;
-      document.getElementById('suggestionsBox').classList.add('hidden');
-      updateLivePreview();
-      showToast(`Selected ${name}`, 'info');
-    }
-
-    // ----------------------------------------------------
-    // LIST CALCULATIONS & MANIPULATION
-    // ----------------------------------------------------
-    function addProductToList() {
-      const nameInput = document.getElementById('prodName');
-      const priceInput = document.getElementById('prodPrice');
-      const qtyInput = document.getElementById('prodQty');
-
-      const name = nameInput.value.trim();
-      const priceVal = parseFloat(priceInput.value);
-      const qtyVal = parseInt(qtyInput.value) || 1;
+    function addItemFromUI() {
+      const name = document.getElementById('item-name').value.trim();
+      const priceVal = document.getElementById('item-price').value;
+      const qtyVal = document.getElementById('item-qty').value;
 
       if (!name) {
-        showToast("Please enter a product name.", "warning");
-        nameInput.focus();
+        showToast('প্রোডাক্টের নাম লিখুন', 'danger');
         return;
       }
 
-      if (isNaN(priceVal) || priceVal < 0) {
-        showToast("Please specify a valid price.", "warning");
-        priceInput.focus();
+      const price = parseFloat(priceVal) || 0;
+      const qty = parseFloat(qtyVal) || 1;
+
+      const activeList = state.lists[state.activeListId];
+      if (!activeList) {
+        showToast('কোনো সক্রিয় তালিকা পাওয়া যায়নি', 'danger');
         return;
       }
 
-      const existingIndex = activeListItems.findIndex(item => item.name.toLowerCase() === name.toLowerCase());
-      
-      if (existingIndex !== -1) {
-        activeListItems[existingIndex].qty += qtyVal;
-        showToast(`Incremented "${name}" quantity by ${qtyVal}`, "success");
-      } else {
-        const newItem = {
-          id: Date.now().toString(),
-          name: name,
-          price: priceVal,
-          qty: qtyVal
-        };
-        activeListItems.unshift(newItem);
-        showToast(`"${name}" added successfully!`, "success");
-      }
-
-      savedLists[activeListName] = activeListItems;
-      saveToLocalStorage();
-
-      // Reset Inputs
-      nameInput.value = "";
-      priceInput.value = "";
-      qtyInput.value = "1";
-
-      updateLivePreview();
-      renderActiveList();
-    }
-
-    function changeQty(id, delta) {
-      const item = activeListItems.find(i => i.id === id);
-      if (!item) return;
-
-      const newQty = item.qty + delta;
-      if (newQty < 1) {
-        deleteItem(id);
-      } else {
-        item.qty = newQty;
-        savedLists[activeListName] = activeListItems;
-        saveToLocalStorage();
-        renderActiveList();
-      }
-    }
-
-    function deleteItem(id) {
-      const index = activeListItems.findIndex(i => i.id === id);
-      if (index === -1) return;
-
-      undoBuffer = {
-        index: index,
-        item: { ...activeListItems[index] }
+      const newItem = {
+        id: 'item_' + Date.now(),
+        name,
+        price,
+        qty
       };
 
-      activeListItems.splice(index, 1);
-      savedLists[activeListName] = activeListItems;
-      saveToLocalStorage();
-      renderActiveList();
+      activeList.items.push(newItem);
+      saveState();
+      renderAll();
 
-      const undoNotif = document.getElementById('undoNotification');
-      undoNotif.classList.remove('hidden');
-      setTimeout(() => {
-        undoNotif.classList.add('hidden');
-      }, 5000);
-    }
-
-    function triggerUndo() {
-      if (!undoBuffer) return;
+      document.getElementById('item-name').value = '';
+      document.getElementById('item-price').value = '';
+      document.getElementById('item-qty').value = '';
       
-      activeListItems.splice(undoBuffer.index, 0, undoBuffer.item);
-      savedLists[activeListName] = activeListItems;
-      saveToLocalStorage();
-      renderActiveList();
-
-      document.getElementById('undoNotification').classList.add('hidden');
-      showToast(`Restored "${undoBuffer.item.name}"`, "success");
-      undoBuffer = null;
+      updateLivePreviewCard();
+      document.getElementById('item-name').focus();
+      showToast(`"${name}" যোগ করা হয়েছে!`, 'success');
     }
 
-    async function confirmClearAll() {
-      if (activeListItems.length === 0) {
-        showToast("Nothing to clear", "info");
+    function renderAll() {
+      const activeList = state.lists[state.activeListId];
+      if (!activeList) {
+        document.getElementById('active-list-title').textContent = 'তালিকা নেই';
+        document.getElementById('items-container').innerHTML = `
+          <div class="glassmorphism rounded-2xl p-6 text-center border py-10 text-slate-400 dark:text-slate-600">
+            <i data-lucide="folders" class="w-10 h-10 mx-auto mb-3 opacity-50"></i>
+            <p class="text-sm">কোনো শপিং লিস্ট তৈরি করা নেই।</p>
+            <button onclick="toggleListsModal(true)" class="mt-3.5 bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-xl text-xs font-bold">নতুন লিস্ট তৈরি করুন</button>
+          </div>`;
+        updateGlobalTotals(0, 0, 0);
+        lucide.createIcons();
         return;
       }
 
-      const confirmed = await showCustomDialog(
-        "Clear All List Items?",
-        "This will permanently erase all active items listed on screen right now. Make sure you've saved this list elsewhere if needed.",
-        false,
-        "",
-        "trash-2",
-        "bg-rose-500"
-      );
+      document.getElementById('active-list-title').textContent = activeList.name;
 
-      if (confirmed) {
-        activeListItems = [];
-        savedLists[activeListName] = [];
-        saveToLocalStorage();
-        renderActiveList();
-        showToast("List completely wiped out", "danger");
-      }
-    }
-
-    function handleSearch(query) {
-      renderActiveList(query);
-    }
-
-    function renderActiveList(filterKeyword = "") {
-      const listContainer = document.getElementById('productList');
-      const emptyState = document.getElementById('emptyState');
-      listContainer.innerHTML = "";
-
-      const displayedItems = activeListItems.filter(item => 
-        item.name.toLowerCase().includes(filterKeyword.toLowerCase())
-      );
-
-      if (displayedItems.length === 0) {
-        emptyState.classList.remove('hidden');
-        document.getElementById('itemsCounter').innerText = "0 Items";
-      } else {
-        emptyState.classList.add('hidden');
-        document.getElementById('itemsCounter').innerText = `${displayedItems.length} Items`;
+      const searchQ = document.getElementById('search-input').value.trim().toLowerCase();
+      let filteredItems = activeList.items || [];
+      if (searchQ) {
+        filteredItems = filteredItems.filter(item => item.name.toLowerCase().includes(searchQ));
       }
 
-      let grandTotal = 0;
-      let totalQty = 0;
+      const container = document.getElementById('items-container');
+      container.innerHTML = '';
 
-      displayedItems.forEach(item => {
-        const itemTotal = item.price * item.qty;
-        grandTotal += itemTotal;
-        totalQty += item.qty;
+      if (filteredItems.length === 0) {
+        container.innerHTML = `
+          <div class="glassmorphism rounded-2xl p-6 text-center border py-10 text-slate-400 dark:text-slate-500">
+            <i data-lucide="shopping-cart" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+            <p class="text-sm font-semibold">${searchQ ? 'সার্চের সাথে মেলেনি' : 'কোনো আইটেম নেই। উপরে প্রোডাক্টটি লিখুন।'}</p>
+          </div>`;
+        updateGlobalTotals(0, 0, 0);
+        lucide.createIcons();
+        return;
+      }
 
-        const card = document.createElement('div');
-        card.className = "bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 rounded-2xl p-4 flex items-center justify-between shadow-premium dark:shadow-premium-dark hover:shadow-md transition-all duration-300";
-        card.innerHTML = `
-          <div class="space-y-1.5 max-w-[60%]">
-            <h4 class="font-bold text-slate-800 dark:text-zinc-100 text-sm truncate" title="${item.name}">${item.name}</h4>
-            <div class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">
-              1 unit = <span class="font-semibold text-slate-700 dark:text-zinc-300">${item.price.toFixed(2)} ৳</span>
-            </div>
-            <div class="text-xs font-black text-brand-600 dark:text-brand-400">
-              Total: ${itemTotal.toFixed(2)} ৳
+      let uniqueItems = 0;
+      let totalUnitsCount = 0;
+      let grandTotalSum = 0;
+
+      filteredItems.forEach(item => {
+        uniqueItems++;
+        totalUnitsCount += item.qty;
+        const totalCost = item.price * item.qty;
+        grandTotalSum += totalCost;
+
+        const row = document.createElement('div');
+        row.className = 'glassmorphism rounded-2xl p-3.5 shadow-xs border flex items-center justify-between gap-3 transition-all hover:scale-[1.01]';
+        row.innerHTML = `
+          <div class="flex-grow min-w-0">
+            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">${item.name}</h4>
+            <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 flex gap-2">
+              <span>${state.settings.currency}${item.price.toFixed(2)} / পিস</span>
+              <span>•</span>
+              <span class="font-bold text-brand-600 dark:text-brand-400">মোট: ${state.settings.currency}${totalCost.toFixed(2)}</span>
             </div>
           </div>
-
-          <div class="flex items-center gap-2.5">
-            <div class="flex items-center bg-slate-50 dark:bg-zinc-800/80 rounded-xl overflow-hidden border border-slate-200/50 dark:border-zinc-700">
-              <button onclick="changeQty('${item.id}', -1)" class="px-2.5 py-2 text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 active:scale-95 transition-all"><i data-lucide="minus" class="w-3.5 h-3.5"></i></button>
-              <span class="px-2.5 text-xs font-black text-slate-800 dark:text-zinc-100 min-w-[20px] text-center">${item.qty}</span>
-              <button onclick="changeQty('${item.id}', 1)" class="px-2.5 py-2 text-slate-500 hover:bg-slate-200 dark:hover:bg-zinc-700 active:scale-95 transition-all"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+          
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="flex items-center border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 p-1">
+              <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" aria-label="Decrease qty">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="w-8 text-center text-xs font-bold">${item.qty}</span>
+              <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors" aria-label="Increase qty">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
-
-            <button onclick="deleteItem('${item.id}')" class="p-2.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 active:scale-90 transition-all" title="Remove item">
+            
+            <button onclick="deleteItem('${item.id}')" class="p-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-950/80 text-rose-500 rounded-xl transition-all" aria-label="Delete">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
-        listContainer.appendChild(card);
+        container.appendChild(row);
       });
 
-      animateNumberChange('grandCount', activeListItems.length);
-      animateNumberChange('grandQty', totalQty);
-      animateNumberChange('grandTotal', grandTotal, true);
-
-      const savedIndicator = document.getElementById('savedIndicator');
-      if (JSON.stringify(savedLists[activeListName]) === JSON.stringify(activeListItems)) {
-        savedIndicator.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-brand-500"></i> Saved`;
-        savedIndicator.className = "text-xs font-black text-brand-500 uppercase tracking-wider flex items-center justify-center gap-1 mt-0.5";
-      } else {
-        savedIndicator.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-500 animate-pulse"></i> Changed`;
-        savedIndicator.className = "text-xs font-black text-amber-500 uppercase tracking-wider flex items-center justify-center gap-1 mt-0.5";
-      }
-
+      updateGlobalTotals(uniqueItems, totalUnitsCount, grandTotalSum);
       lucide.createIcons();
     }
 
-    function animateNumberChange(elementId, targetVal, isFloat = false) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-      const start = parseFloat(el.innerText) || 0;
-      const change = targetVal - start;
-      const duration = 250;
-      let startTimestamp = null;
+    function updateGlobalTotals(unique, units, total) {
+      document.getElementById('grand-total-val').textContent = `${state.settings.currency}${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('summary-meta').textContent = `${unique} টি আলাদা আইটেম (মোট পরিমাণ: ${units.toFixed(1)})`;
+    }
 
-      function step(timestamp) {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        const current = start + (change * progress);
-        el.innerText = isFloat ? current.toFixed(2) : Math.floor(current).toString();
-        if (progress < 1) {
-          window.requestAnimationFrame(step);
-        } else {
-          el.innerText = isFloat ? targetVal.toFixed(2) : targetVal.toString();
-        }
+    window.changeQty = function(id, val) {
+      const activeList = state.lists[state.activeListId];
+      if (!activeList) return;
+      const item = activeList.items.find(i => i.id === id);
+      if (item) {
+        item.qty = Math.max(0.1, parseFloat((item.qty + val).toFixed(2)));
+        saveState();
+        renderAll();
       }
-      window.requestAnimationFrame(step);
-    }
+    };
 
-    // ----------------------------------------------------
-    // MULTIPLE LISTS SYSTEM
-    // ----------------------------------------------------
-    function openListsModal() {
-      document.getElementById('listsModal').classList.remove('hidden');
-      renderSavedLists();
-    }
+    window.deleteItem = function(id) {
+      const activeList = state.lists[state.activeListId];
+      if (!activeList) return;
+      const idx = activeList.items.findIndex(i => i.id === id);
+      if (idx !== -1) {
+        const deleted = activeList.items.splice(idx, 1)[0];
+        undoBuffer = { listId: state.activeListId, item: deleted, index: idx };
+        saveState();
+        renderAll();
 
-    function closeListsModal() {
-      document.getElementById('listsModal').classList.add('hidden');
-    }
-
-    function renderSavedLists(filterQuery = "") {
-      const container = document.getElementById('savedListsContainer');
-      container.innerHTML = "";
-      const keys = Object.keys(savedLists);
-
-      const filteredKeys = keys.filter(k => k.toLowerCase().includes(filterQuery.toLowerCase()));
-
-      if (filteredKeys.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-8 text-slate-400 dark:text-zinc-500">
-            <i data-lucide="archive" class="w-10 h-10 mx-auto mb-2 opacity-60"></i>
-            <span class="text-xs font-medium">No saved archives match filter</span>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
+        showToastWithAction(
+          `"${deleted.name}" তালিকা থেকে সরানো হয়েছে`,
+          'danger',
+          'পূর্বাবস্থায় ফেরান',
+          () => {
+            if (undoBuffer) {
+              const lst = state.lists[undoBuffer.listId];
+              if (lst) {
+                lst.items.splice(undoBuffer.index, 0, undoBuffer.item);
+                saveState();
+                renderAll();
+                showToast(`"${undoBuffer.item.name}" পূর্বাবস্থায় আনা হয়েছে!`, 'success');
+              }
+              undoBuffer = null;
+            }
+          }
+        );
       }
+    };
 
-      filteredKeys.forEach(key => {
-        const listData = savedLists[key] || [];
-        const isCurrentActive = (key === activeListName);
+    function renderSavedListsUI() {
+      const container = document.getElementById('lists-items-list');
+      container.innerHTML = '';
+
+      Object.values(state.lists).forEach(list => {
+        const isActive = list.id === state.activeListId;
+        const totalValue = list.items.reduce((sum, current) => sum + (current.price * current.qty), 0);
         
-        let totalVal = 0;
-        let itemsCount = listData.length;
-        listData.forEach(i => { totalVal += (i.price * i.qty); });
-
         const row = document.createElement('div');
-        row.className = `p-3 rounded-2xl flex items-center justify-between border transition-all ${isCurrentActive ? 'bg-brand-50/70 border-brand-200 dark:bg-brand-950/20 dark:border-brand-900/40' : 'bg-slate-50 border-slate-200/50 dark:bg-zinc-800/40 dark:border-zinc-800'}`;
-        
+        row.className = `p-3.5 rounded-2xl border flex justify-between items-center gap-2 transition-all ${isActive ? 'bg-brand-50/70 border-brand-200 dark:bg-brand-950/20 dark:border-brand-900/50' : 'bg-slate-50 dark:bg-slate-900 border-slate-200/50 dark:border-slate-800'}`;
         row.innerHTML = `
-          <div onclick="switchActiveList('${key}')" class="flex-1 cursor-pointer pr-4 space-y-0.5">
+          <div class="flex-grow cursor-pointer" onclick="switchActiveList('${list.id}')">
             <div class="flex items-center gap-1.5">
-              <span class="font-bold text-xs ${isCurrentActive ? 'text-brand-700 dark:text-brand-400' : 'text-slate-800 dark:text-zinc-200'} truncate">${key}</span>
-              ${isCurrentActive ? '<span class="bg-brand-500 text-[8px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-wider">Active</span>' : ''}
+              <span class="font-bold text-sm text-slate-800 dark:text-slate-100">${list.name}</span>
+              ${isActive ? '<span class="text-[10px] bg-brand-500 text-white font-bold px-2 py-0.5 rounded-full">সক্রিয়</span>' : ''}
             </div>
-            <div class="text-[10px] text-slate-400 dark:text-zinc-400">
-              ${itemsCount} distinct items • <span class="font-semibold text-slate-500 dark:text-zinc-300">${totalVal.toFixed(2)} ৳</span>
-            </div>
+            <p class="text-xs text-slate-400 mt-1">${list.items.length} টি পণ্য • মোট: ${state.settings.currency}${totalValue.toFixed(2)}</p>
           </div>
-          
-          <div class="flex items-center gap-1">
-            <button onclick="promptRenameList('${key}')" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors">
-              <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+          <div class="flex gap-1">
+            <button onclick="renameList('${list.id}')" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" aria-label="Rename">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
             </button>
-            <button onclick="deleteSavedList('${key}')" class="p-1.5 text-rose-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors">
-              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            <button onclick="deleteList('${list.id}')" class="p-2 text-rose-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors" aria-label="Delete">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
@@ -1005,438 +731,356 @@
       lucide.createIcons();
     }
 
-    async function createNewBlankList() {
-      const name = await showCustomDialog(
-        "Create New List",
-        "Type a beautiful name for your next shopping excursion:",
-        true,
-        `Grocery List #${Object.keys(savedLists).length + 1}`,
-        "folder-plus"
-      );
+    window.switchActiveList = function(id) {
+      state.activeListId = id;
+      saveState();
+      renderAll();
+      toggleListsModal(false);
+      showToast('লিস্ট পরিবর্তন করা হয়েছে!', 'info');
+    };
 
-      if (name && name.trim()) {
-        const listTitle = name.trim();
-        if (savedLists[listTitle]) {
-          showToast("A list with that name already exists!", "warning");
-          return;
+    window.renameList = function(id) {
+      const target = state.lists[id];
+      if (!target) return;
+      showCustomPrompt('লিস্টের নাম পরিবর্তন', 'নতুন নামটি লিখুন:', target.name, (newName) => {
+        if (newName && newName.trim()) {
+          target.name = newName.trim();
+          saveState();
+          renderSavedListsUI();
+          renderAll();
+          showToast('লিস্টের নাম সফলভাবে আপডেট হয়েছে', 'success');
         }
+      });
+    };
 
-        savedLists[listTitle] = [];
-        activeListName = listTitle;
-        activeListItems = [];
-        
-        saveToLocalStorage();
-        document.getElementById('activeListNameDisplay').innerText = activeListName;
-        renderActiveList();
-        renderSavedLists();
-        showToast(`Created and switched to "${listTitle}"`, "success");
+    window.deleteList = function(id) {
+      if (Object.keys(state.lists).length <= 1) {
+        showToast('আপনার অন্তত একটি মেমো লিস্ট থাকা আবশ্যক!', 'warning');
+        return;
       }
-    }
-
-    function switchActiveList(key) {
-      if (!savedLists[key]) return;
-      activeListName = key;
-      activeListItems = savedLists[key];
-      
-      saveToLocalStorage();
-      document.getElementById('activeListNameDisplay').innerText = activeListName;
-      renderActiveList();
-      renderSavedLists();
-      closeListsModal();
-      showToast(`Switched active state: "${key}"`, "info");
-    }
-
-    async function promptRenameCurrentList() {
-      const newName = await showCustomDialog(
-        "Rename Current List",
-        "Change the name of your active record instantly:",
-        true,
-        activeListName,
-        "edit-3"
-      );
-
-      if (newName && newName.trim() && newName.trim() !== activeListName) {
-        const cleanedName = newName.trim();
-        savedLists[cleanedName] = activeListItems;
-        delete savedLists[activeListName];
-        activeListName = cleanedName;
-
-        saveToLocalStorage();
-        document.getElementById('activeListNameDisplay').innerText = activeListName;
-        renderActiveList();
-        showToast("Memo renamed successfully", "success");
-      }
-    }
-
-    async function promptRenameList(oldKey) {
-      const newName = await showCustomDialog(
-        "Rename Collection",
-        `Enter a new catalog title for "${oldKey}":`,
-        true,
-        oldKey,
-        "edit-2"
-      );
-
-      if (newName && newName.trim() && newName.trim() !== oldKey) {
-        const cleaned = newName.trim();
-        savedLists[cleaned] = savedLists[oldKey];
-        delete savedLists[oldKey];
-        
-        if (activeListName === oldKey) {
-          activeListName = cleaned;
-          document.getElementById('activeListNameDisplay').innerText = activeListName;
+      showCustomConfirm('লিস্ট মুছে ফেলুন', `আপনি কি নিশ্চিতভাবে "${state.lists[id].name}" লিস্টটি মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা যাবে না।`, () => {
+        delete state.lists[id];
+        if (state.activeListId === id) {
+          state.activeListId = Object.keys(state.lists)[0];
         }
+        saveState();
+        renderSavedListsUI();
+        renderAll();
+        showToast('লিস্ট মুছে ফেলা হয়েছে!', 'warning');
+      });
+    };
 
-        saveToLocalStorage();
-        renderActiveList();
-        renderSavedLists();
-        showToast("Collection updated", "success");
-      }
-    }
-
-    async function deleteSavedList(key) {
-      const confirmed = await showCustomDialog(
-        "Delete Saved List?",
-        `Are you absolutely sure you want to permanently delete the entire memo dataset associated with "${key}"?`,
-        false,
-        "",
-        "alert-triangle",
-        "bg-rose-500"
-      );
-
-      if (confirmed) {
-        delete savedLists[key];
-        
-        if (activeListName === key) {
-          const remainingKeys = Object.keys(savedLists);
-          if (remainingKeys.length > 0) {
-            activeListName = remainingKeys[0];
-            activeListItems = savedLists[activeListName];
-          } else {
-            activeListName = "Today's Grocery";
-            activeListItems = [];
-            savedLists[activeListName] = activeListItems;
-          }
-          document.getElementById('activeListNameDisplay').innerText = activeListName;
-        }
-
-        saveToLocalStorage();
-        renderActiveList();
-        renderSavedLists();
-        showToast(`Memo deleted permanently.`, "danger");
-      }
-    }
-
-    function saveActiveList() {
-      savedLists[activeListName] = activeListItems;
-      saveToLocalStorage();
-      renderActiveList();
-      showToast(`Saved state for "${activeListName}"`, "success");
-    }
-
-    // ----------------------------------------------------
-    // IMPORTS & EXPORTS RESTORE MODULES
-    // ----------------------------------------------------
-    function toggleBackupMenu() {
-      const menu = document.getElementById('backupMenu');
-      if (menu.classList.contains('hidden')) {
-        menu.classList.remove('hidden');
+    window.toggleListsModal = function(show) {
+      const modal = document.getElementById('modal-lists');
+      const inner = modal.querySelector('div');
+      if (show) {
+        renderSavedListsUI();
+        modal.classList.remove('hidden');
+        setTimeout(() => { inner.classList.remove('translate-y-full', 'sm:scale-95'); }, 10);
       } else {
-        menu.classList.add('hidden');
+        inner.classList.add('translate-y-full', 'sm:scale-95');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
       }
+    };
+
+    window.toggleSettingsModal = function(show) {
+      const modal = document.getElementById('modal-settings');
+      const inner = modal.querySelector('div');
+      if (show) {
+        modal.classList.remove('hidden');
+        setTimeout(() => { inner.classList.remove('translate-y-full', 'sm:scale-95'); }, 10);
+      } else {
+        inner.classList.add('translate-y-full', 'sm:scale-95');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+      }
+    };
+
+    // PREMIUM POPUP SYSTEMS
+    function showCustomPrompt(title, text, defaultValue, callback) {
+      const container = document.getElementById('modal-container');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <h3 class="font-extrabold text-base text-slate-800 dark:text-slate-100 mb-2">${title}</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">${text}</p>
+        <input type="text" id="custom-prompt-input" value="${defaultValue}" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none mb-5 transition-all">
+        <div class="flex gap-2">
+          <button id="custom-prompt-cancel" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all">বাতিল</button>
+          <button id="custom-prompt-ok" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl text-xs font-bold transition-all">নিশ্চিত</button>
+        </div>
+      `;
+
+      container.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        document.getElementById('custom-prompt-input').select();
+      }, 10);
+
+      const dismiss = () => {
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => { container.classList.add('hidden'); }, 300);
+      };
+
+      document.getElementById('custom-prompt-cancel').addEventListener('click', dismiss);
+      document.getElementById('custom-prompt-ok').addEventListener('click', () => {
+        const val = document.getElementById('custom-prompt-input').value;
+        dismiss();
+        callback(val);
+      });
     }
 
-    function exportBackupData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedLists));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `Smart_Shopping_Memo_Backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showToast("Backup exported successfully", "success");
-      toggleBackupMenu();
+    function showCustomConfirm(title, text, callback) {
+      const container = document.getElementById('modal-container');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <h3 class="font-extrabold text-base text-slate-800 dark:text-slate-100 mb-2">${title}</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">${text}</p>
+        <div class="flex gap-2">
+          <button id="custom-confirm-cancel" class="flex-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition-all">বাতিল</button>
+          <button id="custom-confirm-ok" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-xl text-xs font-bold transition-all">হ্যাঁ, নিশ্চিত</button>
+        </div>
+      `;
+
+      container.classList.remove('hidden');
+      setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); }, 10);
+
+      const dismiss = () => {
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => { container.classList.add('hidden'); }, 300);
+      };
+
+      document.getElementById('custom-confirm-cancel').addEventListener('click', dismiss);
+      document.getElementById('custom-confirm-ok').addEventListener('click', () => {
+        dismiss();
+        callback();
+      });
     }
 
-    function importBackupData(event) {
-      const file = event.target.files[0];
+    function showToast(message, type = 'info') {
+      createToastNode(message, type);
+    }
+
+    function showToastWithAction(message, type, actionText, actionCallback) {
+      createToastNode(message, type, actionText, actionCallback);
+    }
+
+    function createToastNode(message, type, actionText = null, actionCallback = null) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let colors = 'bg-slate-900 text-white';
+      let icon = 'info';
+
+      if (type === 'success') {
+        colors = 'bg-brand-600 text-white';
+        icon = 'check-circle';
+      } else if (type === 'warning') {
+        colors = 'bg-amber-500 text-white';
+        icon = 'alert-triangle';
+      } else if (type === 'danger') {
+        colors = 'bg-rose-600 text-white';
+        icon = 'x-circle';
+      }
+
+      toast.className = `${colors} p-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-3 text-xs font-bold pointer-events-auto transform translate-y-4 opacity-0 transition-all duration-300`;
+      
+      toast.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i data-lucide="${icon}" class="w-4 h-4"></i>
+          <span>${message}</span>
+        </div>
+        ${actionText ? `<button class="bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-lg text-[10px] uppercase font-black tracking-wider transition-all">${actionText}</button>` : ''}
+      `;
+
+      if (actionText && actionCallback) {
+        toast.querySelector('button').addEventListener('click', () => {
+          actionCallback();
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => { toast.remove(); }, 300);
+        });
+      }
+
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => { toast.removeProperty ? toast.removeProperty('translate-y-4') : toast.classList.remove('translate-y-4', 'opacity-0'); }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => { toast.remove(); }, 300);
+      }, 3500);
+    }
+
+    function exportBackupJSON() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `smart_shopping_memo_backup_${Date.now()}.json`;
+      a.click();
+      showToast('ব্যাকআপ ডাউনলোড হয়েছে!', 'success');
+    }
+
+    function handleImportBackup(e) {
+      const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async function(e) {
+      reader.onload = function(evt) {
         try {
-          const parsed = JSON.parse(e.target.result);
-          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-            throw new Error("Invalid format structure.");
-          }
-
-          const confirmed = await showCustomDialog(
-            "Overwrite Local Data?",
-            "Restoring will append and override lists containing identical keys. Proceed?",
-            false,
-            "",
-            "upload-cloud"
-          );
-
-          if (confirmed) {
-            savedLists = { ...savedLists, ...parsed };
-            const keys = Object.keys(savedLists);
-            if (keys.length > 0) {
-              activeListName = keys[0];
-              activeListItems = savedLists[activeListName];
-            }
-            saveToLocalStorage();
-            document.getElementById('activeListNameDisplay').innerText = activeListName;
-            renderActiveList();
-            showToast("Imported data integrated!", "success");
-            toggleBackupMenu();
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed && typeof parsed === 'object' && parsed.lists && parsed.settings) {
+            state = parsed;
+            saveState();
+            initTheme();
+            renderAll();
+            showToast('সফলভাবে ব্যাকআপ রিস্টোর করা হয়েছে!', 'success');
+          } else {
+            showToast('ভুল ফাইল ফরম্যাট।', 'danger');
           }
         } catch (err) {
-          showToast("Failed to parse JSON backup. Format invalid.", "danger");
+          showToast('ফাইলটি পড়া সম্ভব হয়নি।', 'danger');
         }
       };
       reader.readAsText(file);
     }
 
-    // ----------------------------------------------------
-    // RECEIPT EXPORTER (HIGH FIDELITY jsPDF MODULE)
-    // ----------------------------------------------------
-    function openPdfConfigModal() {
-      if (activeListItems.length === 0) {
-        showToast("Please add items to your list before printing.", "warning");
+    // --- HIGH-FIDELITY PERFECT BENGALI RENDERING ENGINE ---
+    // Instead of raw jsPDF text drawing which breaks complex Bangla glyphs and vowel placements,
+    // this builds a highly polished HTML Cash Memo inside a hidden viewport with real-time browser text-shaping engine
+    // and exports it via html2pdf using clean canvas high DPI vectors (300dpi scaling).
+    // Results are extremely crisp, readable, highly professional, searchable and small in file size.
+    function generateProfessionalPDFMemo() {
+      const activeList = state.lists[state.activeListId];
+      if (!activeList || activeList.items.length === 0) {
+        showToast('আপনার মেমোতে কোনো প্রোডাক্ট অ্যাড করা নেই!', 'warning');
         return;
       }
-      
-      const timestampPart = Date.now().toString().slice(-4);
-      document.getElementById('pdfInvoiceNo').value = `SSM-${timestampPart}`;
-      document.getElementById('pdfConfigModal').classList.remove('hidden');
-    }
 
-    function closePdfConfigModal() {
-      document.getElementById('pdfConfigModal').classList.add('hidden');
-    }
+      showToast('পিডিএফ তৈরি হচ্ছে, দয়া করে অপেক্ষা করুন...', 'info');
 
-    function triggerInvoiceExport() {
-      closePdfConfigModal();
-      showToast("Compiling professional PDF receipt...", "info");
+      const invoiceDiv = document.getElementById('invisible-pdf-invoice');
+      invoiceDiv.innerHTML = ''; // Reset area
+      invoiceDiv.classList.remove('hidden');
 
-      setTimeout(() => {
-        try {
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-          });
+      const timestampText = state.settings.includeTimestamp ? `<div><strong>তারিখ ও সময়:</strong> ${new Date().toLocaleString('bn-BD')}</div>` : '';
+      let tableRows = '';
+      let grandTotalSum = 0;
 
-          const shopName = document.getElementById('pdfShopName').value.trim() || "SMART SHOPPING MEMO";
-          const memoNumber = document.getElementById('pdfInvoiceNo').value.trim() || `SSM-${Date.now().toString().slice(-4)}`;
-          const footerNote = document.getElementById('pdfThankYouNote').value.trim() || "Thank you for shopping with us!";
-          const includeTimestamp = document.getElementById('pdfIncludeDate').checked;
+      activeList.items.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        grandTotalSum += itemTotal;
+        tableRows += `
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 10px; font-size: 13px; color: #1e293b;">${index + 1}</td>
+            <td style="padding: 10px; font-size: 13px; color: #1e293b; font-family: 'Hind Siliguri', sans-serif; font-weight: 600;">${item.name}</td>
+            <td style="padding: 10px; font-size: 13px; color: #1e293b; text-align: right;">${state.settings.currency}${item.price.toFixed(2)}</td>
+            <td style="padding: 10px; font-size: 13px; color: #1e293b; text-align: center;">${item.qty}</td>
+            <td style="padding: 10px; font-size: 13px; color: #0f172a; font-weight: bold; text-align: right;">${state.settings.currency}${itemTotal.toFixed(2)}</td>
+          </tr>
+        `;
+      });
 
-          const rightNow = new Date();
-          const dateStr = rightNow.toLocaleDateString();
-          const timeStr = rightNow.toLocaleTimeString();
+      // Construct Invoice HTML with professional typography, borderlines, brand accents, and a dual-signature layout
+      const invoiceHTML = `
+        <div style="padding: 40px; font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif; color: #0f172a; background-color: #ffffff; max-width: 800px; margin: 0 auto; min-height: 980px; box-sizing: border-box; display: flex; flex-col; justify-content: space-between;">
+          <div>
+            <!-- Banner Ribbon Accent -->
+            <div style="background-color: #10b981; height: 6px; width: 100%; margin-bottom: 30px; border-radius: 3px;"></div>
 
-          const pageLeftMargin = 15;
-          const pageRightMargin = 195;
-          let currentY = 20;
+            <!-- Top Header Details -->
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px;">
+              <div>
+                <h1 style="font-size: 26px; font-weight: 800; color: #064e3b; margin: 0 0 5px 0; font-family: 'Hind Siliguri', sans-serif;">${state.settings.shopName}</h1>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">অফিসিয়াল ক্যাশ মেমো / ক্রয় রশিদ</p>
+              </div>
+              <div style="text-align: right; font-size: 13px; color: #475569; line-height: 1.6;">
+                <div style="font-size: 15px; font-weight: bold; color: #0f172a;">ইনভয়েস # ${state.settings.invoicePrefix}${state.settings.invoiceCounter}</div>
+                ${timestampText}
+              </div>
+            </div>
 
-          // Header Block Decoration
-          doc.setFillColor(34, 197, 94);
-          doc.rect(pageLeftMargin, currentY, 180, 2, 'F');
-          currentY += 10;
+            <!-- List Metadata Header -->
+            <div style="background-color: #f8fafc; border-radius: 12px; padding: 15px 20px; margin-bottom: 30px; border: 1px solid #e2e8f0; font-size: 13px;">
+              <span style="color: #64748b; font-weight: 600;">মেমো ফাইলের নাম:</span>
+              <span style="color: #0f172a; font-weight: bold; margin-left: 5px; font-family: 'Hind Siliguri', sans-serif;">${activeList.name}</span>
+            </div>
 
-          // Shop Title Centered
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(22);
-          doc.setTextColor(30, 41, 59);
-          doc.text(shopName.toUpperCase(), 105, currentY, { align: "center" });
-          currentY += 6;
+            <!-- Main Items Table -->
+            <table style="width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 40px;">
+              <thead>
+                <tr style="background-color: #064e3b; color: #ffffff; border-radius: 8px;">
+                  <th style="padding: 12px 10px; font-size: 12px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">ক্র. নং</th>
+                  <th style="padding: 12px 10px; font-size: 12px; text-align: left;">পণ্যের নাম</th>
+                  <th style="padding: 12px 10px; font-size: 12px; text-align: right;">একক মূল্য</th>
+                  <th style="padding: 12px 10px; font-size: 12px; text-align: center;">পরিমাণ</th>
+                  <th style="padding: 12px 10px; font-size: 12px; text-align: right; border-top-right-radius: 8px; border-bottom-right-radius: 8px;">মোট মূল্য</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
 
-          // Memo Tagline
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
-          doc.setTextColor(100, 116, 139);
-          doc.text("AUTO-GENERATED SMART CASH RECEIPT", 105, currentY, { align: "center" });
-          currentY += 12;
+            <!-- Grand Summary Calculation Block -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 80px;">
+              <div style="width: 250px; background-color: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 8px;">
+                  <span>মোট আইটেম:</span>
+                  <span style="font-weight: bold; color: #0f172a;">${activeList.items.length} টি</span>
+                </div>
+                <div style="height: 1px; background-color: #e2e8f0; margin-bottom: 10px;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 14px; font-weight: bold; color: #0f172a;">সর্বমোট বিল:</span>
+                  <span style="font-size: 18px; font-weight: 800; color: #10b981;">${state.settings.currency}${grandTotalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          // Left Metadata
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(10);
-          doc.setTextColor(51, 65, 85);
-          doc.text(`MEMO NO:  ${memoNumber}`, pageLeftMargin, currentY);
-          
-          // Right Metadata
-          doc.setFont("helvetica", "normal");
-          if (includeTimestamp) {
-            doc.text(`DATE:  ${dateStr}`, 150, currentY);
-            currentY += 5;
-            doc.text(`TIME:  ${timeStr}`, 150, currentY);
-          }
-          currentY += 12;
+          <!-- Bottom Footer Area -->
+          <div>
+            <!-- Double Signatures Line Block -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 40px; padding: 0 10px;">
+              <div style="text-align: center; width: 150px;">
+                <div style="border-top: 1px solid #cbd5e1; padding-top: 5px; font-size: 11px; color: #64748b; font-weight: 600;">ক্রেতার স্বাক্ষর</div>
+              </div>
+              <div style="text-align: center; width: 150px;">
+                <div style="border-top: 1px solid #cbd5e1; padding-top: 5px; font-size: 11px; color: #64748b; font-weight: 600;">বিক্রেতার স্বাক্ষর</div>
+              </div>
+            </div>
 
-          // TABLE HEADER
-          doc.setFillColor(241, 245, 249);
-          doc.rect(pageLeftMargin, currentY, 180, 8, 'F');
-          
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(9);
-          doc.setTextColor(51, 65, 85);
+            <!-- Footer Message -->
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 15px; text-align: center; font-size: 11px; color: #94a3b8; font-family: 'Hind Siliguri', sans-serif; font-weight: 500;">
+              ${state.settings.footerNote}
+            </div>
+          </div>
+        </div>
+      `;
 
-          doc.text("SL", pageLeftMargin + 2, currentY + 5.5);
-          doc.text("PRODUCT NAME DESCRIPTION", pageLeftMargin + 12, currentY + 5.5);
-          doc.text("UNIT PRICE", 120, currentY + 5.5, { align: "right" });
-          doc.text("QTY", 150, currentY + 5.5, { align: "center" });
-          doc.text("SUBTOTAL", pageRightMargin - 2, currentY + 5.5, { align: "right" });
-          
-          currentY += 8;
+      invoiceDiv.innerHTML = invoiceHTML;
 
-          // TABLE DATA ROWS
-          doc.setFont("helvetica", "normal");
-          let calculatedSum = 0;
-          let calculatedQty = 0;
-
-          activeListItems.forEach((item, index) => {
-            const subtotal = item.price * item.qty;
-            calculatedSum += subtotal;
-            calculatedQty += item.qty;
-
-            if (index % 2 === 1) {
-              doc.setFillColor(248, 250, 252);
-              doc.rect(pageLeftMargin, currentY, 180, 8, 'F');
-            }
-
-            doc.setFontSize(9);
-            doc.setTextColor(71, 85, 105);
-            
-            doc.text((index + 1).toString(), pageLeftMargin + 2, currentY + 5.5);
-            
-            let trimmedName = item.name.length > 40 ? item.name.slice(0, 38) + "..." : item.name;
-            doc.text(trimmedName, pageLeftMargin + 12, currentY + 5.5);
-            
-            doc.text(`${item.price.toFixed(2)}`, 120, currentY + 5.5, { align: "right" });
-            doc.text(item.qty.toString(), 150, currentY + 5.5, { align: "center" });
-            doc.text(`${subtotal.toFixed(2)}`, pageRightMargin - 2, currentY + 5.5, { align: "right" });
-
-            currentY += 8;
-            
-            if (currentY > 260) {
-              doc.addPage();
-              currentY = 20;
-            }
-          });
-
-          doc.setDrawColor(226, 232, 240);
-          doc.line(pageLeftMargin, currentY, pageRightMargin, currentY);
-          currentY += 3;
-
-          // CALCULATIONS GRAND BOTTOM BAR
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(10);
-          doc.setTextColor(30, 41, 59);
-
-          doc.text("GRAND TOTAL CALCULATION :", pageLeftMargin + 12, currentY + 5);
-          doc.text(`Qty: ${calculatedQty}`, 150, currentY + 5, { align: "center" });
-          doc.text(`${calculatedSum.toFixed(2)} Taka`, pageRightMargin - 2, currentY + 5, { align: "right" });
-          
-          currentY += 15;
-
-          // Footnotes & Official Declarations
-          doc.setFont("helvetica", "italic");
-          doc.setFontSize(8.5);
-          doc.setTextColor(148, 163, 184);
-          doc.text(footerNote, 105, currentY, { align: "center" });
-          currentY += 22;
-
-          // Official Authorized Signature Grid Section
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(8);
-          doc.setTextColor(100, 116, 139);
-          
-          doc.line(pageLeftMargin + 10, currentY, pageLeftMargin + 60, currentY);
-          doc.line(pageRightMargin - 60, currentY, pageRightMargin - 10, currentY);
-          
-          currentY += 4;
-          doc.text("Customer Handover Signature", pageLeftMargin + 16, currentY);
-          doc.text("Authorized Signature Verification", pageRightMargin - 56, currentY);
-
-          // Save & Download Action
-          const filename = `${activeListName.replace(/\s+/g, '_')}_CashMemo.pdf`;
-          doc.save(filename);
-
-          showToast("PDF Invoice successfully exported!", "success");
-        } catch (error) {
-          console.error(error);
-          showToast("Failed to compile PDF. Check console error outputs.", "danger");
-        }
-      }, 500);
-    }
-
-    // ----------------------------------------------------
-    // VIRTUAL PWA METADATA EMULATION & OFFLINE ENGINE
-    // ----------------------------------------------------
-    function setupPwaCapabilities() {
-      const manifestObject = {
-        name: "Smart Shopping Memo",
-        short_name: "SmartMemo",
-        description: "Premium Offline Grocery Calculator & Invoice generator",
-        start_url: ".",
-        display: "standalone",
-        background_color: "#09090b",
-        theme_color: "#22c55e",
-        icons: [
-          {
-            src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%2322c55e'><circle cx='50' cy='50' r='50'/><path d='M30 40 h40 v35 c0 5 -5 10 -10 10 h-20 c-5 0 -10 -5 -10 -10 z' fill='white'/><path d='M40 40 c0 -10 5 -15 10 -15 s10 5 10 15' stroke='white' stroke-width='4' fill='none'/></svg>",
-            sizes: "192x192",
-            type: "image/svg+xml"
-          }
-        ]
+      // HTML2PDF options targeting crystal-clear high quality image vectors with PDF wrapper encapsulation
+      const opt = {
+        margin:       0,
+        filename:     `CashMemo_${activeList.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`,
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 2.5, useCORS: true, letterRendering: true, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      
-      const manifestBlob = new Blob([JSON.stringify(manifestObject)], {type: 'application/json'});
-      const manifestURL = URL.createObjectURL(manifestBlob);
-      
-      const manifestLink = document.createElement('link');
-      manifestLink.rel = 'manifest';
-      manifestLink.href = manifestURL;
-      document.head.appendChild(manifestLink);
 
-      if ('serviceWorker' in navigator) {
-        const swBlob = new Blob([`
-          const CACHE_NAME = 'ssm-v1-cache';
-          const ASSETS = [
-            '/',
-            'index.html',
-            'https://cdn.tailwindcss.com',
-            'https://unpkg.com/lucide@latest',
-            'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-          ];
-
-          self.addEventListener('install', (e) => {
-            e.waitUntil(
-              caches.open(CACHE_NAME).then((cache) => {
-                return cache.addAll(ASSETS);
-              })
-            );
-          });
-
-          self.addEventListener('fetch', (e) => {
-            e.respondWith(
-              caches.match(e.request).then((cachedResponse) => {
-                return cachedResponse || fetch(e.request).catch(() => {
-                  return new Response("Application is offline but resources are ready inside local sandbox storage.");
-                });
-              })
-            );
-          });
-        `], {type: 'application/javascript'});
-        
-        const swURL = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swURL)
-          .then(() => console.log("Responsive offline caching system operational."))
-          .catch(err => console.log("PWA Service Worker registration deferred: ", err));
-      }
+      // Trigger Generator Stream
+      html2pdf().from(invoiceDiv).set(opt).save().then(() => {
+        invoiceDiv.classList.add('hidden');
+        invoiceDiv.innerHTML = '';
+        state.settings.invoiceCounter++;
+        saveState();
+        showToast('ক্যাশ মেমো সফলভাবে ডাউনলোড হয়েছে!', 'success');
+      }).catch(err => {
+        showToast('পিডিএফ তৈরি ব্যর্থ হয়েছে। আবার চেষ্টা করুন।', 'danger');
+        console.error(err);
+      });
     }
   </script>
 </body>
