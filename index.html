@@ -74,6 +74,59 @@
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col selection:bg-brand-500 selection:text-white">
 
+<div id="authScreen" style="position:fixed;inset:0;z-index:999999;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:400px;background:white;border-radius:20px;padding:20px">
+
+    <h2 style="text-align:center;margin-bottom:15px">
+      Smart Shopping Memo
+    </h2>
+
+    <input id="email"
+      type="email"
+      placeholder="Email"
+      style="width:100%;padding:12px;margin-bottom:10px">
+
+    <input id="password"
+      type="password"
+      placeholder="Password"
+      style="width:100%;padding:12px;margin-bottom:10px">
+
+    <button onclick="signupEmail()"
+      style="width:100%;padding:12px;margin-bottom:10px">
+      Sign Up
+    </button>
+
+    <button onclick="loginEmail()"
+      style="width:100%;padding:12px;margin-bottom:15px">
+      Login
+    </button>
+
+    <hr>
+
+    <input id="phone"
+      type="tel"
+      placeholder="+8801XXXXXXXXX"
+      style="width:100%;padding:12px;margin-top:15px">
+
+    <div id="recaptcha-container"></div>
+
+    <button onclick="sendOTP()"
+      style="width:100%;padding:12px;margin-top:10px">
+      Send OTP
+    </button>
+
+    <input id="otp"
+      placeholder="OTP Code"
+      style="width:100%;padding:12px;margin-top:10px">
+
+    <button onclick="verifyOTP()"
+      style="width:100%;padding:12px;margin-top:10px">
+      Verify OTP
+    </button>
+
+  </div>
+</div>
+
   <!-- Sticky Top Header -->
   <header class="sticky top-0 z-40 glassmorphism shadow-sm border-b transition-all">
     <div class="px-4 py-3 flex items-center justify-between">
@@ -1082,6 +1135,93 @@
         console.error(err);
       });
     }
+    
+    <script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+
+import {
+ getAuth,
+ createUserWithEmailAndPassword,
+ signInWithEmailAndPassword,
+ signInWithPhoneNumber,
+ RecaptchaVerifier,
+ onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+const firebaseConfig = {
+ apiKey: "AIzaSyDs8FiJjQ6WR11bgZq6wSc2gmYIDVqkdDA",
+ authDomain: "shopping-cart-3a55d.firebaseapp.com",
+ projectId: "shopping-cart-3a55d",
+ storageBucket: "shopping-cart-3a55d.firebasestorage.app",
+ messagingSenderId: "63889015712",
+ appId: "1:63889015712:web:b5d8b8dcfa47c94fb81ac5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.recaptchaVerifier =
+new RecaptchaVerifier(
+ auth,
+ "recaptcha-container",
+ {}
+);
+
+window.signupEmail = async () => {
+ const email = email.value;
+ const password = password.value;
+
+ await createUserWithEmailAndPassword(
+   auth,
+   email,
+   password
+ );
+};
+
+window.loginEmail = async () => {
+ const email = document.getElementById("email").value;
+ const password = document.getElementById("password").value;
+
+ await signInWithEmailAndPassword(
+   auth,
+   email,
+   password
+ );
+};
+
+window.sendOTP = async () => {
+ const phone =
+ document.getElementById("phone").value;
+
+ const appVerifier =
+ window.recaptchaVerifier;
+
+ window.confirmationResult =
+ await signInWithPhoneNumber(
+   auth,
+   phone,
+   appVerifier
+ );
+};
+
+window.verifyOTP = async () => {
+ const code =
+ document.getElementById("otp").value;
+
+ await window.confirmationResult.confirm(code);
+};
+
+onAuthStateChanged(auth,(user)=>{
+ if(user){
+   document.getElementById("authScreen")
+   .style.display="none";
+ }else{
+   document.getElementById("authScreen")
+   .style.display="flex";
+ }
+});
   </script>
 </body>
 </html>
