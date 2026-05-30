@@ -70,303 +70,373 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    .loader-spinner {
+      border: 3px solid rgba(16, 185, 129, 0.2);
+      border-left-color: #10b981;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300 flex flex-col selection:bg-brand-500 selection:text-white">
 
-<div id="authScreen" style="position:fixed;inset:0;z-index:999999;background:#0f172a;display:flex;align-items:center;justify-content:center;padding:20px">
-  <div style="width:100%;max-width:400px;background:white;border-radius:20px;padding:20px">
-
-    <h2 style="text-align:center;margin-bottom:15px">
-      Smart Shopping Memo
-    </h2>
-
-    <input id="email"
-      type="email"
-      placeholder="Email"
-      style="width:100%;padding:12px;margin-bottom:10px">
-
-    <input id="password"
-      type="password"
-      placeholder="Password"
-      style="width:100%;padding:12px;margin-bottom:10px">
-
-    <button onclick="signupEmail()"
-      style="width:100%;padding:12px;margin-bottom:10px">
-      Sign Up
-    </button>
-
-    <button onclick="loginEmail()"
-      style="width:100%;padding:12px;margin-bottom:15px">
-      Login
-    </button>
-
-    <hr>
-
-    <input id="phone"
-      type="tel"
-      placeholder="+8801XXXXXXXXX"
-      style="width:100%;padding:12px;margin-top:15px">
-
-    <div id="recaptcha-container"></div>
-
-    <button onclick="sendOTP()"
-      style="width:100%;padding:12px;margin-top:10px">
-      Send OTP
-    </button>
-
-    <input id="otp"
-      placeholder="OTP Code"
-      style="width:100%;padding:12px;margin-top:10px">
-
-    <button onclick="verifyOTP()"
-      style="width:100%;padding:12px;margin-top:10px">
-      Verify OTP
-    </button>
-
-  </div>
-</div>
-
-  <!-- Sticky Top Header -->
-  <header class="sticky top-0 z-40 glassmorphism shadow-sm border-b transition-all">
-    <div class="px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <div class="bg-brand-500 text-white p-2.5 rounded-2xl shadow-lg shadow-brand-500/20">
-          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h1 class="font-bold text-base leading-none tracking-tight">স্মার্ট শপিং মেমো</h1>
-          <p id="active-list-title" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">তালিকা লোড হচ্ছে...</p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2">
-        <button id="btn-theme" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle Theme">
-          <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
-          <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-slate-600"></i>
-        </button>
-        <button id="btn-lists" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
-          <i data-lucide="folders" class="w-4 h-4"></i>
-          <span>লিস্টসমূহ</span>
-        </button>
-        <button id="btn-settings" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="PDF Settings">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-grow p-4 space-y-4 max-w-lg mx-auto w-full pb-36">
-    
-    <!-- Quick Search bar -->
-    <div class="relative">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
-      </span>
-      <input type="text" id="search-input" placeholder="আইটেম খুঁজুন..." class="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-    </div>
-
-    <!-- Creator Form Panel -->
-    <section class="glassmorphism rounded-2xl p-4 shadow-sm border space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/50 pb-2">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">নতুন প্রোডাক্ট যোগ করুন</h2>
-        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 bg-brand-50 dark:bg-brand-900/20 px-2.5 py-0.5 rounded-full">
-          <span class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-ping"></span> লাইভ প্রিভিউ
-        </span>
-      </div>
-
-      <!-- Live Dynamic Card Preview -->
-      <div class="relative bg-gradient-to-br from-brand-600 to-emerald-600 rounded-xl p-4 text-white overflow-hidden shadow-md shadow-brand-500/10 min-h-[92px] transition-all">
-        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-        <div class="relative flex justify-between items-start">
-          <div class="space-y-1 w-2/3">
-            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">প্রোডাক্ট প্রিভিউ</span>
-            <h3 id="preview-name" class="font-bold text-base truncate">প্রোডাক্টের নাম</h3>
-            <p id="preview-qty-rate" class="text-xs text-brand-50">০ x ৳ ০.০০</p>
-          </div>
-          <div class="text-right">
-            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">মোট মূল্য</span>
-            <p id="preview-subtotal" class="font-bold text-lg tracking-tight">৳ ০.০০</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Input Fields Form -->
-      <div class="space-y-3.5">
-        <!-- Autocomplete Product Input -->
-        <div class="relative">
-          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-name">প্রোডাক্টের নাম (বাংলা অথবা ইংরেজি)</label>
-          <input type="text" id="item-name" placeholder="যেমন: লাক্স সাবান, শ্যাম্পু, ক্যাডবেরি চকলেট..." class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all" autocomplete="off">
-          
-          <!-- Autocomplete Dropdown list -->
-          <div id="autocomplete-list" class="absolute z-50 left-0 right-0 top-[74px] glassmorphism border border-slate-200 dark:border-slate-800 rounded-xl max-h-48 overflow-y-auto shadow-xl hidden transition-all no-scrollbar">
-            <!-- suggestions -->
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-price">একক মূল্য (৳)</label>
-            <input type="number" id="item-price" step="any" placeholder="০.০০" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-qty">পরিমাণ / সংখ্যা</label>
-            <input type="number" id="item-qty" step="any" placeholder="১" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-          </div>
-        </div>
-
-        <button id="btn-add-item" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> তালিকায় যোগ করুন
-        </button>
-      </div>
-    </section>
-
-    <!-- Shopping Items Section -->
-    <section class="space-y-2">
-      <div class="flex justify-between items-center px-1">
-        <h3 class="font-bold text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-          <i data-lucide="list-checks" class="w-4 h-4"></i> মেমো আইটেমসমূহ
-        </h3>
-        <button id="btn-clear-all" class="text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-400 flex items-center gap-1 transition-all">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> সব মুছুন
-        </button>
-      </div>
-
-      <!-- List Container -->
-      <div id="items-container" class="space-y-2.5">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-
-    <!-- Storage Backup/Restore Panel -->
-    <section class="glassmorphism rounded-2xl p-3 shadow-xs border flex justify-between items-center gap-2">
-      <div class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-        সকল ডেটা অফলাইনে আপনার ব্রাউজারে সংরক্ষিত থাকে।
-      </div>
-      <div class="flex gap-2">
-        <button id="btn-export-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i> ব্যাকআপ
-        </button>
-        <button id="btn-import-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
-          <i data-lucide="upload" class="w-3.5 h-3.5"></i> রিস্টোর
-        </button>
-        <input type="file" id="import-file-input" class="hidden" accept=".json">
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Sticky Bottom Summary Bar -->
-  <footer class="fixed bottom-0 left-0 right-0 z-40 glassmorphism border-t border-slate-200 dark:border-slate-800/80 safe-bottom shadow-2xl max-w-lg mx-auto">
-    <div class="px-4 py-3 grid grid-cols-2 gap-4 items-center">
-      <div class="flex flex-col">
-        <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">সর্বমোট বিল</span>
-        <div class="flex items-baseline gap-1">
-          <span id="grand-total-val" class="font-extrabold text-2xl tracking-tight text-brand-600 dark:text-brand-400">৳ ০.০০</span>
-        </div>
-        <span id="summary-meta" class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">০ টি আইটেম</span>
-      </div>
-      <div>
-        <button id="btn-export-pdf" class="w-full bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-500 hover:to-emerald-500 active:scale-95 text-white py-3 px-4 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center gap-1.5">
-          <i data-lucide="file-text" class="w-4.5 h-4.5"></i> মেমো ডাউনলোড করুন
-        </button>
-      </div>
-    </div>
-  </footer>
-
-  <!-- MODERN CUSTOM MODAL DIALOGS -->
-  <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
-    <div id="modal-content" class="w-full max-w-sm glassmorphism rounded-3xl p-5 shadow-2xl border transition-all scale-95 opacity-0 duration-300">
-      <!-- Injected via JS -->
-    </div>
-  </div>
-
-  <!-- MULTIPLE SAVED LISTS MODAL -->
-  <div id="modal-lists" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
-    <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-extrabold text-base flex items-center gap-2">
-          <i data-lucide="folders" class="w-5 h-5 text-brand-500"></i> আপনার মেমো লিস্টসমূহ
-        </h3>
-        <button onclick="toggleListsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      
-      <!-- List Items List Container -->
-      <div id="lists-items-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 no-scrollbar mb-4">
-        <!-- Saved Lists -->
-      </div>
-
-      <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
-        <button id="btn-create-list" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-1">
-          <i data-lucide="plus" class="w-4 h-4"></i> নতুন মেমো লিস্ট তৈরি করুন
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PDF CASH MEMO SETTINGS MODAL -->
-  <div id="modal-settings" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
-    <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-extrabold text-base flex items-center gap-2">
-          <i data-lucide="settings-2" class="w-5 h-5 text-brand-500"></i> মেমো ও দোকানের সেটিংস
-        </h3>
-        <button onclick="toggleSettingsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3.5 text-sm">
-        <div>
-          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-shop">দোকান / প্রতিষ্ঠানের নাম</label>
-          <input type="text" id="setting-shop" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-invoice">মেমো নম্বর প্রিফিক্স</label>
-            <input type="text" id="setting-invoice" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-currency">মুদ্রার প্রতীক</label>
-            <input type="text" id="setting-currency" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-footer">ফুটার বার্তা (ধন্যবাদ নোট)</label>
-          <input type="text" id="setting-footer" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
-        </div>
-        <div class="flex items-center justify-between p-1">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">সময় ও তারিখ যুক্ত করুন</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="setting-timestamp" class="sr-only peer" checked>
-            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-          </label>
-        </div>
-      </div>
-
-      <div class="mt-5 flex gap-2">
-        <button onclick="toggleSettingsModal(false)" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-bold text-sm transition-all">
-          সংরক্ষণ করুন
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PREMIUM TOAST CONTAINER -->
-  <div id="toast-container" class="fixed bottom-24 left-4 right-4 z-50 flex flex-col gap-2 max-w-sm mx-auto pointer-events-none">
+  <!-- PREMIUM TOAST CONTAINER (Moved to top so auth messages show up) -->
+  <div id="toast-container" class="fixed bottom-24 left-4 right-4 z-[999999] flex flex-col gap-2 max-w-sm mx-auto pointer-events-none">
     <!-- Dynamic Toasts -->
   </div>
 
-  <!-- INVISIBLE TEMPLATE AREA FOR PROFESSIONAL HIGH-RES MEMO GENERATION -->
-  <div id="invisible-pdf-invoice" class="hidden">
-    <!-- HTML markup optimized for crisp high-resolution 300 DPI Rendering with proper Unicode fallback -->
+  <!-- LOADING SCREEN -->
+  <div id="loading-screen" class="fixed inset-0 z-[99999] bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="loader-spinner mb-4"></div>
+    <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 font-['Hind_Siliguri']">অপেক্ষা করুন...</h2>
+    <p class="text-xs text-slate-500 mt-1">লগইন চেক করা হচ্ছে</p>
   </div>
 
-  <!-- APPLICATION LOGIC -->
-  <script>
-    // --- MAIN APP STATE (Initializing with EMPTY items per user request) ---
+  <!-- LOGIN SCREEN -->
+  <div id="auth-screen" class="fixed inset-0 z-[99998] bg-slate-50 dark:bg-slate-950 hidden flex-col items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md glassmorphism rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800/80">
+      
+      <div class="text-center mb-6">
+        <div class="bg-brand-500 text-white p-3 rounded-2xl shadow-lg shadow-brand-500/20 inline-block mb-3">
+          <i data-lucide="shopping-bag" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">স্মার্ট শপিং মেমো</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">আপনার ডেটা ক্লাউডে সুরক্ষিত রাখুন</p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="flex bg-slate-100 dark:bg-slate-900 rounded-xl p-1 mb-5">
+        <button onclick="switchAuthTab('email')" id="tab-email" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white dark:bg-slate-800 shadow text-brand-600 dark:text-brand-400 transition-all">ইমেইল</button>
+        <button onclick="switchAuthTab('phone')" id="tab-phone" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all">ফোন নম্বর</button>
+      </div>
+
+      <!-- Email Auth Form -->
+      <div id="form-email" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">ইমেইল এড্রেস</label>
+          <input id="auth-email" type="email" placeholder="example@mail.com" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">পাসওয়ার্ড</label>
+          <input id="auth-password" type="password" placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button onclick="loginEmail()" class="flex-1 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-500/15">
+            লগইন
+          </button>
+          <button onclick="signupEmail()" class="flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-white py-2.5 rounded-xl font-bold text-sm transition-all">
+            রেজিস্ট্রেশন
+          </button>
+        </div>
+      </div>
+
+      <!-- Phone Auth Form -->
+      <div id="form-phone" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">ফোন নম্বর</label>
+          <input id="auth-phone" type="tel" placeholder="+8801XXXXXXXXX" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+        </div>
+        
+        <div id="recaptcha-container" class="my-2 flex justify-center"></div>
+
+        <button id="btn-send-otp" onclick="sendOTP()" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-brand-500/15">
+          OTP পাঠান
+        </button>
+
+        <div id="otp-section" class="hidden space-y-3.5 pt-2 border-t border-slate-200 dark:border-slate-800">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">OTP কোড</label>
+            <input id="auth-otp" type="text" placeholder="123456" class="w-full px-3.5 py-2.5 text-sm tracking-widest text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+          </div>
+          <button onclick="verifyOTP()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/15">
+            OTP যাচাই করুন
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION CONTENT (Hidden until Auth) -->
+  <div id="app-content" class="hidden flex-col min-h-screen">
+    
+    <!-- Sticky Top Header -->
+    <header class="sticky top-0 z-40 glassmorphism shadow-sm border-b transition-all">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="bg-brand-500 text-white p-2.5 rounded-2xl shadow-lg shadow-brand-500/20">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-base leading-none tracking-tight">স্মার্ট শপিং মেমো</h1>
+            <p id="active-list-title" class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">তালিকা লোড হচ্ছে...</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button id="btn-theme" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Toggle Theme">
+            <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-400"></i>
+            <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-slate-600"></i>
+          </button>
+          <button id="btn-lists" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-400">
+            <i data-lucide="folders" class="w-4 h-4"></i>
+            <span>লিস্টসমূহ</span>
+          </button>
+          <button id="btn-settings" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Settings">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow p-4 space-y-4 max-w-lg mx-auto w-full pb-36">
+      
+      <!-- Quick Search bar -->
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+        </span>
+        <input type="text" id="search-input" placeholder="আইটেম খুঁজুন..." class="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+      </div>
+
+      <!-- Creator Form Panel -->
+      <section class="glassmorphism rounded-2xl p-4 shadow-sm border space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/50 pb-2">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">নতুন প্রোডাক্ট যোগ করুন</h2>
+          <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-600 bg-brand-50 dark:bg-brand-900/20 px-2.5 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 bg-brand-500 rounded-full animate-ping"></span> লাইভ প্রিভিউ
+          </span>
+        </div>
+
+        <!-- Live Dynamic Card Preview -->
+        <div class="relative bg-gradient-to-br from-brand-600 to-emerald-600 rounded-xl p-4 text-white overflow-hidden shadow-md shadow-brand-500/10 min-h-[92px] transition-all">
+          <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+          <div class="relative flex justify-between items-start">
+            <div class="space-y-1 w-2/3">
+              <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">প্রোডাক্ট প্রিভিউ</span>
+              <h3 id="preview-name" class="font-bold text-base truncate">প্রোডাক্টের নাম</h3>
+              <p id="preview-qty-rate" class="text-xs text-brand-50">০ x ৳ ০.০০</p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] uppercase font-bold tracking-widest text-brand-100 block">মোট মূল্য</span>
+              <p id="preview-subtotal" class="font-bold text-lg tracking-tight">৳ ০.০০</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Fields Form -->
+        <div class="space-y-3.5">
+          <!-- Autocomplete Product Input -->
+          <div class="relative">
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-name">প্রোডাক্টের নাম (বাংলা অথবা ইংরেজি)</label>
+            <input type="text" id="item-name" placeholder="যেমন: লাক্স সাবান, শ্যাম্পু, ক্যাডবেরি চকলেট..." class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all" autocomplete="off">
+            
+            <!-- Autocomplete Dropdown list -->
+            <div id="autocomplete-list" class="absolute z-50 left-0 right-0 top-[74px] glassmorphism border border-slate-200 dark:border-slate-800 rounded-xl max-h-48 overflow-y-auto shadow-xl hidden transition-all no-scrollbar">
+              <!-- suggestions -->
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-price">একক মূল্য (৳)</label>
+              <input type="number" id="item-price" step="any" placeholder="০.০০" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="item-qty">পরিমাণ / সংখ্যা</label>
+              <input type="number" id="item-qty" step="any" placeholder="১" class="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+            </div>
+          </div>
+
+          <button id="btn-add-item" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-95 text-white py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> তালিকায় যোগ করুন
+          </button>
+        </div>
+      </section>
+
+      <!-- Shopping Items Section -->
+      <section class="space-y-2">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="font-bold text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-4 h-4"></i> মেমো আইটেমসমূহ
+          </h3>
+          <button id="btn-clear-all" class="text-xs font-bold text-rose-500 hover:text-rose-600 dark:text-rose-400 flex items-center gap-1 transition-all">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> সব মুছুন
+          </button>
+        </div>
+
+        <!-- List Container -->
+        <div id="items-container" class="space-y-2.5">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      <!-- Storage Backup/Restore Panel -->
+      <section class="glassmorphism rounded-2xl p-3 shadow-xs border flex justify-between items-center gap-2">
+        <div class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+          সকল ডেটা ক্লাউডে আপনার অ্যাকাউন্টে স্বয়ংক্রিয়ভাবে সংরক্ষিত হচ্ছে।
+        </div>
+        <div class="flex gap-2">
+          <button id="btn-export-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> ব্যাকআপ
+          </button>
+          <button id="btn-import-backup" class="px-2.5 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-all flex items-center gap-1">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> রিস্টোর
+          </button>
+          <input type="file" id="import-file-input" class="hidden" accept=".json">
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Sticky Bottom Summary Bar -->
+    <footer class="fixed bottom-0 left-0 right-0 z-40 glassmorphism border-t border-slate-200 dark:border-slate-800/80 safe-bottom shadow-2xl max-w-lg mx-auto">
+      <div class="px-4 py-3 grid grid-cols-2 gap-4 items-center">
+        <div class="flex flex-col">
+          <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">সর্বমোট বিল</span>
+          <div class="flex items-baseline gap-1">
+            <span id="grand-total-val" class="font-extrabold text-2xl tracking-tight text-brand-600 dark:text-brand-400">৳ ০.০০</span>
+          </div>
+          <span id="summary-meta" class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">০ টি আইটেম</span>
+        </div>
+        <div>
+          <button id="btn-export-pdf" class="w-full bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-500 hover:to-emerald-500 active:scale-95 text-white py-3 px-4 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-brand-500/20 transition-all flex items-center justify-center gap-1.5">
+            <i data-lucide="file-text" class="w-4.5 h-4.5"></i> মেমো ডাউনলোড করুন
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- MODERN CUSTOM MODAL DIALOGS -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+      <div id="modal-content" class="w-full max-w-sm glassmorphism rounded-3xl p-5 shadow-2xl border transition-all scale-95 opacity-0 duration-300">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- MULTIPLE SAVED LISTS MODAL -->
+    <div id="modal-lists" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+      <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-extrabold text-base flex items-center gap-2">
+            <i data-lucide="folders" class="w-5 h-5 text-brand-500"></i> আপনার মেমো লিস্টসমূহ
+          </h3>
+          <button onclick="toggleListsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <!-- List Items List Container -->
+        <div id="lists-items-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 no-scrollbar mb-4">
+          <!-- Saved Lists -->
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <button id="btn-create-list" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-1">
+            <i data-lucide="plus" class="w-4 h-4"></i> নতুন মেমো লিস্ট তৈরি করুন
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF CASH MEMO SETTINGS & LOGOUT MODAL -->
+    <div id="modal-settings" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 dark:bg-slate-950/70 backdrop-blur-sm p-4 hidden">
+      <div class="w-full max-w-md glassmorphism rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border transition-all transform translate-y-full sm:translate-y-0 sm:scale-95 duration-300">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-extrabold text-base flex items-center gap-2">
+            <i data-lucide="settings-2" class="w-5 h-5 text-brand-500"></i> মেমো ও অ্যাকাউন্টের সেটিংস
+          </h3>
+          <button onclick="toggleSettingsModal(false)" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3.5 text-sm max-h-[60vh] overflow-y-auto no-scrollbar pb-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-shop">দোকান / প্রতিষ্ঠানের নাম</label>
+            <input type="text" id="setting-shop" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-invoice">মেমো নম্বর প্রিফিক্স</label>
+              <input type="text" id="setting-invoice" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-currency">মুদ্রার প্রতীক</label>
+              <input type="text" id="setting-currency" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1" for="setting-footer">ফুটার বার্তা (ধন্যবাদ নোট)</label>
+            <input type="text" id="setting-footer" class="w-full px-3.5 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all">
+          </div>
+          <div class="flex items-center justify-between p-1">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">সময় ও তারিখ যুক্ত করুন</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="setting-timestamp" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-slate-200 dark:bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Logout and Save Section -->
+        <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+          <!-- LOGOUT -->
+          <button onclick="logoutApp()" class="flex-1 bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/40 dark:hover:bg-rose-950/80 text-rose-600 dark:text-rose-400 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-1.5">
+            <i data-lucide="log-out" class="w-4 h-4"></i> লগআউট
+          </button>
+          <button onclick="toggleSettingsModal(false)" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white py-2.5 rounded-xl font-bold text-sm transition-all">
+            সংরক্ষণ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVISIBLE TEMPLATE AREA FOR PROFESSIONAL HIGH-RES MEMO GENERATION -->
+    <div id="invisible-pdf-invoice" class="hidden">
+      <!-- HTML markup optimized for crisp high-resolution rendering -->
+    </div>
+  </div>
+
+  <!-- SINGLE, CONSOLIDATED APPLICATION MODULE (FIREBASE + LOGIC) -->
+  <script type="module">
+    // FIREBASE INITIALIZATION
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signInWithPhoneNumber,
+      RecaptchaVerifier,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDs8FiJjQ6WR11bgZq6wSc2gmYIDVqkdDA",
+      authDomain: "shopping-cart-3a55d.firebaseapp.com",
+      projectId: "shopping-cart-3a55d",
+      storageBucket: "shopping-cart-3a55d.firebasestorage.app",
+      messagingSenderId: "63889015712",
+      appId: "1:63889015712:web:b5d8b8dcfa47c94fb81ac5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+
+    // --- MAIN APP STATE ---
     let state = {
       lists: {}, 
       activeListId: '',
@@ -383,7 +453,254 @@
 
     let undoBuffer = null;
 
-    // GROCERY, COSMETICS, SHAMPOO, SOAP, CHOCOLATE SPECIFIC AUTOCOMPLETE DICTIONARY
+    // CLOUD SAVE & CLOUD LOAD LOGIC
+    // ==========================================
+    
+    // Function to save state to LocalStorage and Cloud Firestore
+    async function saveState() {
+      // 1. Save to local storage immediately for fast offline caching
+      localStorage.setItem('smart_shopping_memo_state_v2', JSON.stringify(state));
+      
+      // 2. Sync to cloud if user is logged in
+      if (currentUser) {
+        try {
+          const docRef = doc(db, 'users', currentUser.uid, 'data', 'appState');
+          await setDoc(docRef, state);
+        } catch (error) {
+          console.error("Cloud sync failed (will retry automatically by Firebase):", error);
+        }
+      }
+    }
+
+    // Function to load state (Priority: Cloud -> LocalStorage -> Default)
+    async function loadState(uid) {
+      if (!uid) {
+        loadLocalState();
+        return;
+      }
+
+      try {
+        const docRef = doc(db, 'users', uid, 'data', 'appState');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          // CLOUD DATA FOUND: Overwrite local state
+          state = docSnap.data();
+          localStorage.setItem('smart_shopping_memo_state_v2', JSON.stringify(state));
+          
+          if (!state.lists || Object.keys(state.lists).length === 0) {
+            setupInitialEmptyList();
+          }
+          showToast('ক্লাউড থেকে ডেটা সিঙ্ক হয়েছে', 'success');
+        } else {
+          // NEW USER / NO CLOUD DATA: Fallback to local or default, then push to cloud
+          loadLocalState();
+          saveState(); // Will push current loaded/default local state to cloud
+        }
+      } catch (error) {
+        console.error("Error loading cloud data:", error);
+        loadLocalState();
+        showToast('অফলাইন মোড - লোকাল ডেটা লোড হয়েছে', 'warning');
+      }
+
+      // Initialize UI after loading state
+      initTheme();
+      syncSettingsToUI();
+      renderAll();
+    }
+
+    function loadLocalState() {
+      const saved = localStorage.getItem('smart_shopping_memo_state_v2');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+          if (!state.lists || Object.keys(state.lists).length === 0) {
+            setupInitialEmptyList();
+          }
+        } catch (e) {
+          setupInitialEmptyList();
+        }
+      } else {
+        setupInitialEmptyList();
+      }
+    }
+
+    function setupInitialEmptyList() {
+      const defaultId = 'list_' + Date.now();
+      state.lists = {};
+      state.lists[defaultId] = {
+        id: defaultId,
+        name: 'গ্রোসারি শপিং লিস্ট',
+        items: [] 
+      };
+      state.activeListId = defaultId;
+      saveState();
+    }
+
+
+    // FIREBASE AUTH (LOGIN SCREEN LOGIC)
+    // ==========================================
+
+    onAuthStateChanged(auth, async (user) => {
+      const loadingScreen = document.getElementById("loading-screen");
+      const authScreen = document.getElementById("auth-screen");
+      const appContent = document.getElementById("app-content");
+
+      if (user) {
+        currentUser = user;
+        // User logged in: Hide auth, load data, show app
+        authScreen.classList.replace('flex', 'hidden');
+        loadingScreen.classList.replace('flex', 'hidden');
+        appContent.classList.replace('hidden', 'flex');
+        
+        await loadState(user.uid);
+      } else {
+        currentUser = null;
+        // User logged out: Hide app, hide loading, show auth
+        appContent.classList.replace('flex', 'hidden');
+        loadingScreen.classList.replace('flex', 'hidden');
+        authScreen.classList.replace('hidden', 'flex');
+      }
+    });
+
+    window.switchAuthTab = (tab) => {
+      const btnEmail = document.getElementById('tab-email');
+      const btnPhone = document.getElementById('tab-phone');
+      const formEmail = document.getElementById('form-email');
+      const formPhone = document.getElementById('form-phone');
+
+      if (tab === 'email') {
+        btnEmail.className = "flex-1 py-2 text-sm font-bold rounded-lg bg-white dark:bg-slate-800 shadow text-brand-600 dark:text-brand-400 transition-all";
+        btnPhone.className = "flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all";
+        formEmail.classList.remove('hidden');
+        formPhone.classList.add('hidden');
+      } else {
+        btnPhone.className = "flex-1 py-2 text-sm font-bold rounded-lg bg-white dark:bg-slate-800 shadow text-brand-600 dark:text-brand-400 transition-all";
+        btnEmail.className = "flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all";
+        formPhone.classList.remove('hidden');
+        formEmail.classList.add('hidden');
+      }
+    };
+
+    window.signupEmail = async () => {
+      const emailInput = document.getElementById("auth-email").value.trim();
+      const passwordInput = document.getElementById("auth-password").value.trim();
+
+      if(!emailInput || !passwordInput) {
+        return showToast('ইমেইল এবং পাসওয়ার্ড আবশ্যক', 'danger');
+      }
+
+      showToast('অ্যাকাউন্ট তৈরি হচ্ছে...', 'info');
+      try {
+        await createUserWithEmailAndPassword(auth, emailInput, passwordInput);
+        // Toast handled by Auth Listener triggering loadState
+      } catch (error) {
+        if(error.code === 'auth/email-already-in-use') showToast('এই ইমেইলটি আগে থেকেই ব্যবহৃত হচ্ছে', 'danger');
+        else if(error.code === 'auth/weak-password') showToast('পাসওয়ার্ড অত্যন্ত দুর্বল', 'danger');
+        else showToast('ত্রুটি: ' + error.message, 'danger');
+      }
+    };
+
+    window.loginEmail = async () => {
+      const emailInput = document.getElementById("auth-email").value.trim();
+      const passwordInput = document.getElementById("auth-password").value.trim();
+
+      if(!emailInput || !passwordInput) {
+        return showToast('ইমেইল এবং পাসওয়ার্ড আবশ্যক', 'danger');
+      }
+
+      showToast('লগইন করা হচ্ছে...', 'info');
+      try {
+        await signInWithEmailAndPassword(auth, emailInput, passwordInput);
+      } catch (error) {
+        if(error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') 
+          showToast('ভুল ইমেইল বা পাসওয়ার্ড', 'danger');
+        else showToast('ত্রুটি: ' + error.message, 'danger');
+      }
+    };
+
+    window.sendOTP = async () => {
+      const phoneInput = document.getElementById("auth-phone").value.trim();
+      
+      if(!phoneInput) {
+        return showToast('ফোন নম্বর আবশ্যক', 'danger');
+      }
+
+      const btn = document.getElementById('btn-send-otp');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'অপেক্ষা করুন...';
+      btn.disabled = true;
+
+      try {
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+            'size': 'invisible'
+          });
+        }
+        
+        const appVerifier = window.recaptchaVerifier;
+        window.confirmationResult = await signInWithPhoneNumber(auth, phoneInput, appVerifier);
+        
+        document.getElementById('otp-section').classList.remove('hidden');
+        btn.classList.add('hidden');
+        showToast('OTP কোড পাঠানো হয়েছে', 'success');
+      } catch (error) {
+        console.error(error);
+        if (error.code === 'auth/internal-error') {
+          showToast('ত্রুটি: প্রিভিউ পরিবেশে Phone Auth সমর্থিত নয়। দয়া করে ইমেইল লগইন ব্যবহার করুন।', 'danger');
+        } else {
+          showToast('ত্রুটি: ' + error.message, 'danger');
+        }
+        
+        if(window.recaptchaVerifier) {
+          try { window.recaptchaVerifier.clear(); } catch(e) {}
+          window.recaptchaVerifier = null;
+        }
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    };
+
+    window.verifyOTP = async () => {
+      const otpInput = document.getElementById("auth-otp").value.trim();
+      if(!otpInput) return showToast('OTP কোড লিখুন', 'danger');
+
+      showToast('যাচাই করা হচ্ছে...', 'info');
+      try {
+        await window.confirmationResult.confirm(otpInput);
+      } catch (error) {
+        showToast('ভুল OTP কোড', 'danger');
+      }
+    };
+
+    // LOGOUT LOGIC
+    window.logoutApp = async () => {
+      try {
+        await signOut(auth);
+        window.toggleSettingsModal(false);
+        showToast('সফলভাবে লগআউট করা হয়েছে', 'success');
+        
+        // Clean form fields
+        document.getElementById("auth-email").value = '';
+        document.getElementById("auth-password").value = '';
+        document.getElementById("auth-phone").value = '';
+        document.getElementById("auth-otp").value = '';
+        document.getElementById('otp-section').classList.add('hidden');
+        document.getElementById('btn-send-otp').classList.remove('hidden');
+        
+        // Render reset state locally so that local storage doesn't bleed data
+        state = { lists: {} }; 
+        renderAll();
+      } catch (error) {
+        showToast('লগআউট করতে সমস্যা হয়েছে', 'danger');
+      }
+    };
+
+
+    // MAIN APPLICATION LOGIC & UI (Preserved entirely)
+    // ==========================================
+
     const DICTIONARY = [
       { bn: 'ক্লিয়ার শ্যাম্পু (Clear Shampoo)', en: 'Clear Shampoo' },
       { bn: 'সানসিল্ক শ্যাম্পু (Sunsilk Shampoo)', en: 'Sunsilk Shampoo' },
@@ -409,45 +726,9 @@
     ];
 
     window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      initTheme();
-      initUI();
-      renderAll();
       lucide.createIcons();
+      initUI();
     });
-
-    function saveState() {
-      localStorage.setItem('smart_shopping_memo_state_v2', JSON.stringify(state));
-    }
-
-    function loadState() {
-      const saved = localStorage.getItem('smart_shopping_memo_state_v2');
-      if (saved) {
-        try {
-          state = JSON.parse(saved);
-          if (!state.lists || Object.keys(state.lists).length === 0) {
-            setupInitialEmptyList();
-          }
-        } catch (e) {
-          setupInitialEmptyList();
-        }
-      } else {
-        setupInitialEmptyList();
-      }
-    }
-
-    // Set up completely empty board as requested
-    function setupInitialEmptyList() {
-      const defaultId = 'list_' + Date.now();
-      state.lists = {};
-      state.lists[defaultId] = {
-        id: defaultId,
-        name: 'গ্রোসারি শপিং লিস্ট',
-        items: [] // Absolutely no items initially
-      };
-      state.activeListId = defaultId;
-      saveState();
-    }
 
     function initTheme() {
       if (state.darkMode) {
@@ -536,13 +817,17 @@
       document.getElementById('setting-currency').addEventListener('input', (e) => { state.settings.currency = e.target.value; saveState(); renderAll(); });
       document.getElementById('setting-footer').addEventListener('input', (e) => { state.settings.footerNote = e.target.value; saveState(); });
       document.getElementById('setting-timestamp').addEventListener('change', (e) => { state.settings.includeTimestamp = e.target.checked; saveState(); });
+    }
 
-      // Load initial Settings
-      document.getElementById('setting-shop').value = state.settings.shopName;
-      document.getElementById('setting-invoice').value = state.settings.invoicePrefix;
-      document.getElementById('setting-currency').value = state.settings.currency;
-      document.getElementById('setting-footer').value = state.settings.footerNote;
-      document.getElementById('setting-timestamp').checked = state.settings.includeTimestamp;
+    function syncSettingsToUI() {
+      // Load Settings to Inputs
+      if (state.settings) {
+        document.getElementById('setting-shop').value = state.settings.shopName || '';
+        document.getElementById('setting-invoice').value = state.settings.invoicePrefix || '';
+        document.getElementById('setting-currency').value = state.settings.currency || '৳';
+        document.getElementById('setting-footer').value = state.settings.footerNote || '';
+        document.getElementById('setting-timestamp').checked = state.settings.includeTimestamp !== false;
+      }
     }
 
     function handleAutocomplete() {
@@ -578,7 +863,7 @@
       const name = document.getElementById('item-name').value.trim() || 'প্রোডাক্টের নাম';
       const price = parseFloat(document.getElementById('item-price').value) || 0;
       const qty = parseFloat(document.getElementById('item-qty').value) || 0;
-      const symb = state.settings.currency;
+      const symb = state.settings.currency || '৳';
 
       document.getElementById('preview-name').textContent = name;
       document.getElementById('preview-qty-rate').textContent = `${qty} x ${symb} ${price.toFixed(2)}`;
@@ -625,7 +910,7 @@
     }
 
     function renderAll() {
-      const activeList = state.lists[state.activeListId];
+      const activeList = state.lists && state.lists[state.activeListId];
       if (!activeList) {
         document.getElementById('active-list-title').textContent = 'তালিকা নেই';
         document.getElementById('items-container').innerHTML = `
@@ -664,6 +949,7 @@
       let uniqueItems = 0;
       let totalUnitsCount = 0;
       let grandTotalSum = 0;
+      const symb = state.settings.currency || '৳';
 
       filteredItems.forEach(item => {
         uniqueItems++;
@@ -677,9 +963,9 @@
           <div class="flex-grow min-w-0">
             <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">${item.name}</h4>
             <div class="text-xs text-slate-400 dark:text-slate-500 mt-1 flex gap-2">
-              <span>${state.settings.currency}${item.price.toFixed(2)} / পিস</span>
+              <span>${symb}${item.price.toFixed(2)} / পিস</span>
               <span>•</span>
-              <span class="font-bold text-brand-600 dark:text-brand-400">মোট: ${state.settings.currency}${totalCost.toFixed(2)}</span>
+              <span class="font-bold text-brand-600 dark:text-brand-400">মোট: ${symb}${totalCost.toFixed(2)}</span>
             </div>
           </div>
           
@@ -707,7 +993,8 @@
     }
 
     function updateGlobalTotals(unique, units, total) {
-      document.getElementById('grand-total-val').textContent = `${state.settings.currency}${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const symb = state.settings.currency || '৳';
+      document.getElementById('grand-total-val').textContent = `${symb}${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       document.getElementById('summary-meta').textContent = `${unique} টি আলাদা আইটেম (মোট পরিমাণ: ${units.toFixed(1)})`;
     }
 
@@ -755,6 +1042,7 @@
     function renderSavedListsUI() {
       const container = document.getElementById('lists-items-list');
       container.innerHTML = '';
+      const symb = state.settings.currency || '৳';
 
       Object.values(state.lists).forEach(list => {
         const isActive = list.id === state.activeListId;
@@ -768,7 +1056,7 @@
               <span class="font-bold text-sm text-slate-800 dark:text-slate-100">${list.name}</span>
               ${isActive ? '<span class="text-[10px] bg-brand-500 text-white font-bold px-2 py-0.5 rounded-full">সক্রিয়</span>' : ''}
             </div>
-            <p class="text-xs text-slate-400 mt-1">${list.items.length} টি পণ্য • মোট: ${state.settings.currency}${totalValue.toFixed(2)}</p>
+            <p class="text-xs text-slate-400 mt-1">${list.items.length} টি পণ্য • মোট: ${symb}${totalValue.toFixed(2)}</p>
           </div>
           <div class="flex gap-1">
             <button onclick="renameList('${list.id}')" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors" aria-label="Rename">
@@ -788,7 +1076,7 @@
       state.activeListId = id;
       saveState();
       renderAll();
-      toggleListsModal(false);
+      window.toggleListsModal(false);
       showToast('লিস্ট পরিবর্তন করা হয়েছে!', 'info');
     };
 
@@ -985,8 +1273,9 @@
           const parsed = JSON.parse(evt.target.result);
           if (parsed && typeof parsed === 'object' && parsed.lists && parsed.settings) {
             state = parsed;
-            saveState();
+            saveState(); // Will push imported content to cloud
             initTheme();
+            syncSettingsToUI();
             renderAll();
             showToast('সফলভাবে ব্যাকআপ রিস্টোর করা হয়েছে!', 'success');
           } else {
@@ -1000,10 +1289,6 @@
     }
 
     // --- HIGH-FIDELITY PERFECT BENGALI RENDERING ENGINE ---
-    // Instead of raw jsPDF text drawing which breaks complex Bangla glyphs and vowel placements,
-    // this builds a highly polished HTML Cash Memo inside a hidden viewport with real-time browser text-shaping engine
-    // and exports it via html2pdf using clean canvas high DPI vectors (300dpi scaling).
-    // Results are extremely crisp, readable, highly professional, searchable and small in file size.
     function generateProfessionalPDFMemo() {
       const activeList = state.lists[state.activeListId];
       if (!activeList || activeList.items.length === 0) {
@@ -1020,6 +1305,7 @@
       const timestampText = state.settings.includeTimestamp ? `<div><strong>তারিখ ও সময়:</strong> ${new Date().toLocaleString('bn-BD')}</div>` : '';
       let tableRows = '';
       let grandTotalSum = 0;
+      const symb = state.settings.currency || '৳';
 
       activeList.items.forEach((item, index) => {
         const itemTotal = item.price * item.qty;
@@ -1028,14 +1314,13 @@
           <tr style="border-bottom: 1px solid #f1f5f9;">
             <td style="padding: 10px; font-size: 13px; color: #1e293b;">${index + 1}</td>
             <td style="padding: 10px; font-size: 13px; color: #1e293b; font-family: 'Hind Siliguri', sans-serif; font-weight: 600;">${item.name}</td>
-            <td style="padding: 10px; font-size: 13px; color: #1e293b; text-align: right;">${state.settings.currency}${item.price.toFixed(2)}</td>
+            <td style="padding: 10px; font-size: 13px; color: #1e293b; text-align: right;">${symb}${item.price.toFixed(2)}</td>
             <td style="padding: 10px; font-size: 13px; color: #1e293b; text-align: center;">${item.qty}</td>
-            <td style="padding: 10px; font-size: 13px; color: #0f172a; font-weight: bold; text-align: right;">${state.settings.currency}${itemTotal.toFixed(2)}</td>
+            <td style="padding: 10px; font-size: 13px; color: #0f172a; font-weight: bold; text-align: right;">${symb}${itemTotal.toFixed(2)}</td>
           </tr>
         `;
       });
 
-      // Construct Invoice HTML with professional typography, borderlines, brand accents, and a dual-signature layout
       const invoiceHTML = `
         <div style="padding: 40px; font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif; color: #0f172a; background-color: #ffffff; max-width: 800px; margin: 0 auto; min-height: 980px; box-sizing: border-box; display: flex; flex-col; justify-content: space-between;">
           <div>
@@ -1086,7 +1371,7 @@
                 <div style="height: 1px; background-color: #e2e8f0; margin-bottom: 10px;"></div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <span style="font-size: 14px; font-weight: bold; color: #0f172a;">সর্বমোট বিল:</span>
-                  <span style="font-size: 18px; font-weight: 800; color: #10b981;">${state.settings.currency}${grandTotalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span style="font-size: 18px; font-weight: 800; color: #10b981;">${symb}${grandTotalSum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>
@@ -1135,93 +1420,7 @@
         console.error(err);
       });
     }
-    
-    <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-
-import {
- getAuth,
- createUserWithEmailAndPassword,
- signInWithEmailAndPassword,
- signInWithPhoneNumber,
- RecaptchaVerifier,
- onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-
-const firebaseConfig = {
- apiKey: "AIzaSyDs8FiJjQ6WR11bgZq6wSc2gmYIDVqkdDA",
- authDomain: "shopping-cart-3a55d.firebaseapp.com",
- projectId: "shopping-cart-3a55d",
- storageBucket: "shopping-cart-3a55d.firebasestorage.app",
- messagingSenderId: "63889015712",
- appId: "1:63889015712:web:b5d8b8dcfa47c94fb81ac5"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-window.recaptchaVerifier =
-new RecaptchaVerifier(
- auth,
- "recaptcha-container",
- {}
-);
-
-window.signupEmail = async () => {
- const email = email.value;
- const password = password.value;
-
- await createUserWithEmailAndPassword(
-   auth,
-   email,
-   password
- );
-};
-
-window.loginEmail = async () => {
- const email = document.getElementById("email").value;
- const password = document.getElementById("password").value;
-
- await signInWithEmailAndPassword(
-   auth,
-   email,
-   password
- );
-};
-
-window.sendOTP = async () => {
- const phone =
- document.getElementById("phone").value;
-
- const appVerifier =
- window.recaptchaVerifier;
-
- window.confirmationResult =
- await signInWithPhoneNumber(
-   auth,
-   phone,
-   appVerifier
- );
-};
-
-window.verifyOTP = async () => {
- const code =
- document.getElementById("otp").value;
-
- await window.confirmationResult.confirm(code);
-};
-
-onAuthStateChanged(auth,(user)=>{
- if(user){
-   document.getElementById("authScreen")
-   .style.display="none";
- }else{
-   document.getElementById("authScreen")
-   .style.display="flex";
- }
-});
   </script>
 </body>
 </html>
